@@ -1,0 +1,238 @@
+DROP VIEW APPS.XX_BI_FI_SUB_INV_V;
+
+/* Formatted on 6/6/2016 4:59:37 PM (QP5 v5.277) */
+CREATE OR REPLACE FORCE VIEW APPS.XX_BI_FI_SUB_INV_V
+(
+   ORGANIZATION_ID,
+   DESCRIPTION,
+   INACTIVE_DATE,
+   LAST_UPDATE_DATE,
+   ORGANIZATION_CODE,
+   ORGANIZATION_NAME,
+   PICKING_ORDER,
+   POST_PROCESSING_LEAD_TIME,
+   PRE_PROCESSING_LEAD_TIME,
+   PROCESSING_LEAD_TIME,
+   SOURCE_ORGANIZATION_CODE,
+   SOURCE_ORGANIZATION_NAME,
+   SOURCE_SUBINVENTORY_NAME,
+   SUBINVENTORY_NAME,
+   DD_CREATION_DATE,
+   MM_CREATION_DATE,
+   QQ_CREATION_DATE,
+   YY_CREATION_DATE,
+   DD_DISABLE_DATE,
+   MM_DISABLE_DATE,
+   QQ_DISABLE_DATE,
+   YY_DISABLE_DATE,
+   DD_LAST_UPDATE_DATE,
+   MM_LAST_UPDATE_DATE,
+   QQ_LAST_UPDATE_DATE,
+   YY_LAST_UPDATE_DATE,
+   INCLUDE_IN_ATP_FLAG,
+   ALLOW_RESERVATION_FLAG,
+   LOCATOR_CONTROL,
+   QUANTITY_TRACKED_FLAG,
+   ASSET_SUBINVENTORY_FLAG,
+   SOURCING_TYPE,
+   NETTABLE_FLAG,
+   MATL_ACC_NO,
+   MTL_OVERHEAD_ACC_NO,
+   RESOURCE_ACC_NO,
+   OVERHEAD_ACC_NO,
+   OUTSIDE_PROCS_ACC_NO,
+   EXPENSE_ACC_NO,
+   ENCUMBRANCE_ACC_NO,
+   SOURCE_ORGANIZATION_ID,
+   CREATED_BY,
+   CREATION_DATE,
+   LAST_UPDATED_BY
+)
+AS
+   SELECT MSS.ORGANIZATION_ID AS "ORGANIZATION_ID",
+          MSS.DESCRIPTION AS "DESCRIPTION",
+          MSS.DISABLE_DATE AS INACTIVE_DATE,
+          MSS.LAST_UPDATE_DATE AS "LAST_UPDATE_DATE",
+          MP1.ORGANIZATION_CODE AS "ORGANIZATION_CODE",
+          HOU1.NAME AS "ORGANIZATION_NAME",
+          MSS.PICKING_ORDER AS "PICKING_ORDER",
+          MSS.POSTPROCESSING_LEAD_TIME AS "POST_PROCESSING_LEAD_TIME",
+          MSS.PREPROCESSING_LEAD_TIME AS "PRE_PROCESSING_LEAD_TIME",
+          MSS.PROCESSING_LEAD_TIME AS "PROCESSING_LEAD_TIME",
+          DECODE (MSS.SOURCE_TYPE, 1, MP2.ORGANIZATION_CODE, NULL)
+             AS "SOURCE_ORGANIZATION_CODE",
+          DECODE (MSS.SOURCE_TYPE, 1, HOU2.NAME, NULL)
+             AS "SOURCE_ORGANIZATION_NAME",
+          DECODE (MSS.SOURCE_TYPE, 1, MSS.SOURCE_SUBINVENTORY, NULL)
+             AS "SOURCE_SUBINVENTORY_NAME",
+          MSS.SECONDARY_INVENTORY_NAME AS "SUBINVENTORY_NAME",
+          (DECODE (
+              MSS.CREATION_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MSS.CREATION_DATE, 'DD'), 'DD') || '190001',
+                 'DDYYYYMM')))
+             AS "DD_CREATION_DATE",
+          (DECODE (
+              MSS.CREATION_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MSS.CREATION_DATE, 'MM'), 'MM') || '1900',
+                 'MMYYYY')))
+             AS "MM_CREATION_DATE",
+          (DECODE (
+              MSS.CREATION_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MSS.CREATION_DATE, 'Q'), 'MM') || '1900',
+                 'MMYYYY')))
+             AS "QQ_CREATION_DATE",
+          (DECODE (
+              MSS.CREATION_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MSS.CREATION_DATE, 'YYYY'), 'YYYY') || '01',
+                 'YYYYMM')))
+             AS "YY_CREATION_DATE",
+          (DECODE (
+              MSS.DISABLE_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MSS.DISABLE_DATE, 'DD'), 'DD') || '190001',
+                 'DDYYYYMM')))
+             AS "DD_DISABLE_DATE",
+          (DECODE (
+              MSS.DISABLE_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MSS.DISABLE_DATE, 'MM'), 'MM') || '1900',
+                 'MMYYYY')))
+             AS "MM_DISABLE_DATE",
+          (DECODE (
+              MSS.DISABLE_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MSS.DISABLE_DATE, 'Q'), 'MM') || '1900',
+                 'MMYYYY')))
+             AS "QQ_DISABLE_DATE",
+          (DECODE (
+              MSS.DISABLE_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MSS.DISABLE_DATE, 'YYYY'), 'YYYY') || '01',
+                 'YYYYMM')))
+             AS "YY_DISABLE_DATE",
+          (DECODE (
+              MSS.LAST_UPDATE_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (MSS.LAST_UPDATE_DATE, 'DD'), 'DD')
+                 || '190001',
+                 'DDYYYYMM')))
+             AS "DD_LAST_UPDATE_DATE",
+          (DECODE (
+              MSS.LAST_UPDATE_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MSS.LAST_UPDATE_DATE, 'MM'), 'MM') || '1900',
+                 'MMYYYY')))
+             AS "MM_LAST_UPDATE_DATE",
+          (DECODE (
+              MSS.LAST_UPDATE_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MSS.LAST_UPDATE_DATE, 'Q'), 'MM') || '1900',
+                 'MMYYYY')))
+             AS "QQ_LAST_UPDATE_DATE",
+          (DECODE (
+              MSS.LAST_UPDATE_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (MSS.LAST_UPDATE_DATE, 'YYYY'), 'YYYY')
+                 || '01',
+                 'YYYYMM')))
+             AS "YY_LAST_UPDATE_DATE",
+          DECODE (MSS.INVENTORY_ATP_CODE,
+                  '1', 'Inventory included in atp calculation',
+                  '2', 'Inventory not included in atp calculation',
+                  NULL)
+             AS "INCLUDE_IN_ATP_FLAG",
+          DECODE (MSS.RESERVABLE_TYPE,  '1', 'Yes',  '2', 'No',  NULL)
+             AS "ALLOW_RESERVATION_FLAG",
+          DECODE (MSS.LOCATOR_TYPE,
+                  '1', 'No locator control',
+                  '2', 'Prespecified locator control',
+                  '3', 'Dynamic entry locator control',
+                  '4', 'Locator control determined at subinventory level',
+                  '5', 'Locator control determined at item level',
+                  NULL)
+             AS "LOCATOR_CONTROL",
+          DECODE (MSS.QUANTITY_TRACKED,  '1', 'Yes',  '2', 'No',  NULL)
+             AS "QUANTITY_TRACKED_FLAG",
+          DECODE (MSS.ASSET_INVENTORY,  '1', 'Yes',  '2', 'No',  NULL)
+             AS "ASSET_SUBINVENTORY_FLAG",
+          DECODE (MSS.SOURCE_TYPE,
+                  '1', 'Inventory',
+                  '2', 'Supplier',
+                  '3', 'Subinventory',
+                  NULL)
+             AS "SOURCING_TYPE",
+          DECODE (MSS.AVAILABILITY_TYPE,
+                  '1', 'Nettable inventory',
+                  '2', 'Nonnettable inventory',
+                  NULL)
+             AS "NETTABLE_FLAG",
+          NULL AS "MATL_ACC_NO",
+          NULL AS "MTL_OVERHEAD_ACC_NO",
+          NULL AS "RESOURCE_ACC_NO",
+          NULL AS "OVERHEAD_ACC_NO",
+          NULL AS "OUTSIDE_PROCS_ACC_NO",
+          NULL AS "EXPENSE_ACC_NO",
+          NULL AS "ENCUMBRANCE_ACC_NO",
+          DECODE (MSS.SOURCE_TYPE, 1, MSS.SOURCE_ORGANIZATION_ID, NULL)
+             AS "SOURCE_ORGANIZATION_ID",
+          MSS.CREATED_BY AS "CREATED_BY",
+          MSS.CREATION_DATE AS "CREATION_DATE",
+          MSS.LAST_UPDATED_BY AS "LAST_UPDATED_BY"
+     FROM MTL_PARAMETERS MP1,
+          MTL_PARAMETERS MP2,
+          HR_ALL_ORGANIZATION_UNITS HOU1,
+          HR_ALL_ORGANIZATION_UNITS HOU2,
+          GL_CODE_COMBINATIONS GLC1,
+          GL_CODE_COMBINATIONS GLC2,
+          GL_CODE_COMBINATIONS GLC3,
+          GL_CODE_COMBINATIONS GLC4,
+          GL_CODE_COMBINATIONS GLC5,
+          GL_CODE_COMBINATIONS GLC6,
+          GL_CODE_COMBINATIONS GLC7,
+          MTL_SECONDARY_INVENTORIES MSS
+    WHERE     GLC1.CODE_COMBINATION_ID(+) = MSS.MATERIAL_ACCOUNT
+          AND GLC2.CODE_COMBINATION_ID(+) = MSS.MATERIAL_OVERHEAD_ACCOUNT
+          AND GLC3.CODE_COMBINATION_ID(+) = MSS.RESOURCE_ACCOUNT
+          AND GLC4.CODE_COMBINATION_ID(+) = MSS.OVERHEAD_ACCOUNT
+          AND GLC5.CODE_COMBINATION_ID(+) = MSS.OUTSIDE_PROCESSING_ACCOUNT
+          AND GLC6.CODE_COMBINATION_ID(+) = MSS.EXPENSE_ACCOUNT
+          AND GLC7.CODE_COMBINATION_ID(+) = MSS.ENCUMBRANCE_ACCOUNT
+          AND MP1.ORGANIZATION_ID = MSS.ORGANIZATION_ID
+          AND MP2.ORGANIZATION_ID(+) = MSS.SOURCE_ORGANIZATION_ID
+          AND HOU1.ORGANIZATION_ID = MSS.ORGANIZATION_ID
+          AND HOU2.ORGANIZATION_ID(+) = MSS.SOURCE_ORGANIZATION_ID;
+
+
+CREATE OR REPLACE SYNONYM ETLEBSUSER.XX_BI_FI_SUB_INV_V FOR APPS.XX_BI_FI_SUB_INV_V;
+
+
+CREATE OR REPLACE SYNONYM XXAPPSREAD.XX_BI_FI_SUB_INV_V FOR APPS.XX_BI_FI_SUB_INV_V;
+
+
+CREATE OR REPLACE SYNONYM XXBI.XX_BI_FI_SUB_INV_V FOR APPS.XX_BI_FI_SUB_INV_V;
+
+
+CREATE OR REPLACE SYNONYM XXINTG.XX_BI_FI_SUB_INV_V FOR APPS.XX_BI_FI_SUB_INV_V;
+
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_FI_SUB_INV_V TO ETLEBSUSER;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_FI_SUB_INV_V TO XXAPPSREAD;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_FI_SUB_INV_V TO XXINTG;

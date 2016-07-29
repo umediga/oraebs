@@ -1,0 +1,69 @@
+DROP PACKAGE APPS.XXO2C_RECALL_TRACE_PKG;
+
+CREATE OR REPLACE PACKAGE APPS."XXO2C_RECALL_TRACE_PKG" AUTHID CURRENT_USER AS
+
+
+  P_ORG_ID NUMBER;
+
+  P_ORDER_TYPE1   oe_order_headers_v.order_type%TYPE;
+
+  P_ORDER_TYPE2   oe_order_headers_v.order_type%TYPE;
+
+  P_ORDER_TYPE3   oe_order_headers_v.order_type%TYPE;
+
+  P_ORDER_TYPE4   oe_order_headers_v.order_type%TYPE;
+
+  P_ORDER_TYPE5   oe_order_headers_v.order_type%TYPE;
+
+  P_ITEM_NUMBER1  oe_order_lines.ordered_item%TYPE;
+
+  P_ITEM_NUMBER2  oe_order_lines.ordered_item%TYPE;
+
+  P_ITEM_NUMBER3  oe_order_lines.ordered_item%TYPE;
+
+  P_ITEM_NUMBER4  oe_order_lines.ordered_item%TYPE;
+
+  P_ITEM_NUMBER5  oe_order_lines.ordered_item%TYPE;
+
+  P_LOT_NUMBER1  mtl_lot_numbers.LOT_NUMBER%TYPE;
+
+  P_LOT_NUMBER2  mtl_lot_numbers.LOT_NUMBER%TYPE;
+
+  P_LOT_NUMBER3  mtl_lot_numbers.LOT_NUMBER%TYPE;
+
+  P_LOT_NUMBER4  mtl_lot_numbers.LOT_NUMBER%TYPE;
+
+  P_LOT_NUMBER5  mtl_lot_numbers.LOT_NUMBER%TYPE;
+
+  P_SERIAL_NUMBER1 mtl_serial_numbers.SERIAL_NUMBER%TYPE;
+
+  P_SERIAL_NUMBER2 mtl_serial_numbers.SERIAL_NUMBER%TYPE;
+
+  P_SERIAL_NUMBER3 mtl_serial_numbers.SERIAL_NUMBER%TYPE;
+
+  P_SERIAL_NUMBER4 mtl_serial_numbers.SERIAL_NUMBER%TYPE;
+
+  P_SERIAL_NUMBER5 mtl_serial_numbers.SERIAL_NUMBER%TYPE;
+
+  P_ORDER_FROM_DATE DATE;
+
+  P_ORDER_TO_DATE DATE;
+
+  LP_DATE_RANGE VARCHAR2(700);
+
+  LP_SERIALNUM_WHERE VARCHAR2(900);
+
+  LP_LOTNUM_WHERE VARCHAR2(900);
+
+  LP_ITEMNUM_WHERE VARCHAR2(900);
+
+  LP_ORDTYPE_WHERE VARCHAR2(900);
+
+  FUNCTION ORG_NAMEFORMULA RETURN VARCHAR2;
+
+  FUNCTION BEFOREREPORT RETURN BOOLEAN;
+
+  FUNCTION AFTERPFORM RETURN BOOLEAN;
+
+END XXO2C_RECALL_TRACE_PKG;
+/

@@ -1,0 +1,92 @@
+DROP VIEW APPS.XX_BI_FI_ITE_CAT_V;
+
+/* Formatted on 6/6/2016 4:59:51 PM (QP5 v5.277) */
+CREATE OR REPLACE FORCE VIEW APPS.XX_BI_FI_ITE_CAT_V
+(
+   C_CODE_NAME,
+   C_CODE_DESC,
+   D_CODE_NAME,
+   D_CODE_DESC,
+   ENABLED_FLAG,
+   END_DATE_ACTIVE,
+   END_DATE_ACTIVE_YEAR,
+   END_DATE_ACTIVE_QUARTER,
+   END_DATE_ACTIVE_MONTH,
+   END_DATE_ACTIVE_DAY
+)
+AS
+   SELECT DISTINCT
+          MCB.SEGMENT8 AS CCODE,
+          (SELECT C.DESCRIPTION
+             FROM FND_FLEX_VALUE_SETS A,
+                  FND_FLEX_VALUES B,
+                  FND_FLEX_VALUES_TL C
+            WHERE     ROWNUM = 1
+                  AND C.LANGUAGE = USERENV ('LANG')
+                  AND B.FLEX_VALUE = MCB.SEGMENT8
+                  AND A.FLEX_VALUE_SET_ID = B.FLEX_VALUE_SET_ID
+                  AND B.FLEX_VALUE_ID = C.FLEX_VALUE_ID)
+             CCODE_DESCRIPTION,
+          MCB.SEGMENT9 AS DCODE,
+          (SELECT C.DESCRIPTION
+             FROM FND_FLEX_VALUE_SETS A,
+                  FND_FLEX_VALUES B,
+                  FND_FLEX_VALUES_TL C
+            WHERE     ROWNUM = 1
+                  AND C.LANGUAGE = USERENV ('LANG')
+                  AND B.FLEX_VALUE = MCB.SEGMENT9
+                  AND A.FLEX_VALUE_SET_ID = B.FLEX_VALUE_SET_ID
+                  AND B.FLEX_VALUE_ID = C.FLEX_VALUE_ID)
+             DCODE_DESCRIPTION,
+          MCB.enabled_flag enabled_flag,
+          MCB.end_date_active end_date_active,
+          (DECODE (
+              MCB.END_DATE_ACTIVE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (MCB.END_DATE_ACTIVE, 'YYYY'), 'YYYY')
+                 || '01',
+                 'YYYYMM')))
+             AS End_Date_Active_Year,
+          (DECODE (
+              MCB.END_DATE_ACTIVE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MCB.END_DATE_ACTIVE, 'Q'), 'MM') || '1900',
+                 'MMYYYY')))
+             AS End_Date_Active_Quarter,
+          (DECODE (
+              MCB.END_DATE_ACTIVE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MCB.END_DATE_ACTIVE, 'MM'), 'MM') || '1900',
+                 'MMYYYY')))
+             AS End_Date_Active_Month,
+          (DECODE (
+              MCB.END_DATE_ACTIVE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (MCB.END_DATE_ACTIVE, 'DD'), 'DD')
+                 || '190001',
+                 'DDYYYYMM')))
+             AS End_Date_Active_Day
+     FROM APPS.MTL_CATEGORIES_B MCB;
+
+
+CREATE OR REPLACE SYNONYM ETLEBSUSER.XX_BI_FI_ITE_CAT_V FOR APPS.XX_BI_FI_ITE_CAT_V;
+
+
+CREATE OR REPLACE SYNONYM XXAPPSREAD.XX_BI_FI_ITE_CAT_V FOR APPS.XX_BI_FI_ITE_CAT_V;
+
+
+CREATE OR REPLACE SYNONYM XXBI.XX_BI_FI_ITE_CAT_V FOR APPS.XX_BI_FI_ITE_CAT_V;
+
+
+CREATE OR REPLACE SYNONYM XXINTG.XX_BI_FI_ITE_CAT_V FOR APPS.XX_BI_FI_ITE_CAT_V;
+
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_FI_ITE_CAT_V TO ETLEBSUSER;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_FI_ITE_CAT_V TO XXAPPSREAD;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_FI_ITE_CAT_V TO XXINTG;

@@ -1,0 +1,101 @@
+DROP VIEW APPS.XX_BI_OE_SHP_MTD_V;
+
+/* Formatted on 6/6/2016 4:59:17 PM (QP5 v5.277) */
+CREATE OR REPLACE FORCE VIEW APPS.XX_BI_OE_SHP_MTD_V
+(
+   SHIP_METHOD_CODE,
+   SHIP_METHOD,
+   DESCRIPTION,
+   INACTIVE_FLAG,
+   ACTIVE_DATE,
+   INACTIVE_DATE,
+   ACTIVE_DATE_DD,
+   ACTIVE_DATE_MONTH,
+   ACTIVE_DATE_Q,
+   ACTIVE_DATE_YEAR,
+   INACTIVE_DATE_DD,
+   INACTIVE_DATE_MONTH,
+   INACTIVE_DATE_Q,
+   INACTIVE_DATE_YEAR
+)
+AS
+   SELECT FCL.LOOKUP_CODE,
+          FCL.MEANING,
+          FCL.DESCRIPTION,
+          DECODE (FCL.ENABLED_FLAG,  'N', 'No',  'Y', 'Yes',  NULL), /* LOOKUP */
+          FCL.START_DATE_ACTIVE,
+          FCL.END_DATE_ACTIVE,
+          (DECODE (
+              FCL.START_DATE_ACTIVE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (FCL.START_DATE_ACTIVE, 'DD'), 'DD')
+                 || '190001',
+                 'DDYYYYMM'))),
+          (DECODE (
+              FCL.START_DATE_ACTIVE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (FCL.START_DATE_ACTIVE, 'MM'), 'MM')
+                 || '1900',
+                 'MMYYYY'))),
+          (DECODE (
+              FCL.START_DATE_ACTIVE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (FCL.START_DATE_ACTIVE, 'Q'), 'MM') || '1900',
+                 'MMYYYY'))),
+          (DECODE (
+              FCL.START_DATE_ACTIVE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (FCL.START_DATE_ACTIVE, 'YYYY'), 'YYYY')
+                 || '01',
+                 'YYYYMM'))),
+          (DECODE (
+              FCL.END_DATE_ACTIVE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (FCL.END_DATE_ACTIVE, 'DD'), 'DD')
+                 || '190001',
+                 'DDYYYYMM'))),
+          (DECODE (
+              FCL.END_DATE_ACTIVE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (FCL.END_DATE_ACTIVE, 'MM'), 'MM') || '1900',
+                 'MMYYYY'))),
+          (DECODE (
+              FCL.END_DATE_ACTIVE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (FCL.END_DATE_ACTIVE, 'Q'), 'MM') || '1900',
+                 'MMYYYY'))),
+          (DECODE (
+              FCL.END_DATE_ACTIVE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (FCL.END_DATE_ACTIVE, 'YYYY'), 'YYYY')
+                 || '01',
+                 'YYYYMM')))
+     FROM FND_COMMON_LOOKUPS FCL
+   WITH READ ONLY;
+
+
+CREATE OR REPLACE SYNONYM ETLEBSUSER.XX_BI_OE_SHP_MTD_V FOR APPS.XX_BI_OE_SHP_MTD_V;
+
+
+CREATE OR REPLACE SYNONYM XXAPPSREAD.XX_BI_OE_SHP_MTD_V FOR APPS.XX_BI_OE_SHP_MTD_V;
+
+
+CREATE OR REPLACE SYNONYM XXBI.XX_BI_OE_SHP_MTD_V FOR APPS.XX_BI_OE_SHP_MTD_V;
+
+
+CREATE OR REPLACE SYNONYM XXINTG.XX_BI_OE_SHP_MTD_V FOR APPS.XX_BI_OE_SHP_MTD_V;
+
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_OE_SHP_MTD_V TO ETLEBSUSER;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_OE_SHP_MTD_V TO XXAPPSREAD;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_OE_SHP_MTD_V TO XXINTG;

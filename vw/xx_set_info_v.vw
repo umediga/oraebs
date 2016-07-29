@@ -1,0 +1,40 @@
+DROP VIEW APPS.XX_SET_INFO_V;
+
+/* Formatted on 6/6/2016 4:58:05 PM (QP5 v5.277) */
+CREATE OR REPLACE FORCE VIEW APPS.XX_SET_INFO_V
+(
+   ROW_ID,
+   LPN_NAME,
+   SET_SERIAL,
+   INVENTORY_ITEM_ID,
+   LOT,
+   SERIAL,
+   TRANSACTION_QUANTITY,
+   TRANSACTION_UNIT_OF_MEASURE,
+   SOURCE_CODE,
+   TRANSACTION_ID,
+   TRANSACTION_SET_ID,
+   TRANSACTION_SOURCE_ID,
+   CREATED_BY,
+   CREATED_DATE,
+   STATUS_INTERFACE,
+   ITEM_NUMBER
+)
+AS
+   SELECT a.ROWID ROW_ID,
+          a."LPN_NAME",
+          a."SET_SERIAL",
+          a."INVENTORY_ITEM_ID",
+          a."LOT",
+          a."SERIAL",
+          a."TRANSACTION_QUANTITY",
+          a."TRANSACTION_UNIT_OF_MEASURE",
+          a."SOURCE_CODE",
+          a."TRANSACTION_ID",
+          a."TRANSACTION_SET_ID",
+          a."TRANSACTION_SOURCE_ID",
+          a."CREATED_BY",
+          a."CREATED_DATE",
+          a."STATUS_INTERFACE",
+          a."ITEM_NUMBER"
+     FROM xx_set_info a;

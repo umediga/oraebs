@@ -1,0 +1,360 @@
+DROP VIEW APPS.XX_BI_FI_MAT_TXN_V;
+
+/* Formatted on 6/6/2016 4:59:49 PM (QP5 v5.277) */
+CREATE OR REPLACE FORCE VIEW APPS.XX_BI_FI_MAT_TXN_V
+(
+   ACCOUNT_ALIAS_ID,
+   ACCOUNT_ID,
+   ALTERNATE_BOM_DESIGNATOR,
+   ALTERNATE_RTG_DESIGNATOR,
+   COMPLETION_TRANSACTION_ID,
+   COST_TYPE,
+   UNIT_COST,
+   COST_UPDATE_ID,
+   CURRENCY_CODE,
+   CYCLE_COUNT_HEADER_ID,
+   DEPARTMENT_CODE,
+   ERROR_CODE,
+   ERROR_EXPLANATION,
+   EXPENDITURE_TYPE,
+   FREIGHT_CODE,
+   MOVE_TRANSACTION_ID,
+   NUMBER_OF_CONTAINERS,
+   ORGANIZATION_NAME,
+   ORG_COST_GROUP,
+   OVERCOMPLETION_TRANSACTION_ID,
+   PA_EXPENDITURE_ORG_NAME,
+   PHYSICAL_INVENTORY_ID,
+   PO_HEADER_ID,
+   PRODUCT#,
+   PRIMARY_UOM,
+   LOT#,
+   LAST_TRANSACTOR,
+   PROJECT_NUMBER,
+   RCV_TRANSACTION_ID,
+   REQUISITION_HEADER_ID,
+   REVISION,
+   SALES_ORDER_ID,
+   SHIPMENT_NUMBER,
+   SOURCE_CODE,
+   SOURCE_LINE_ID,
+   SOURCE_PROJECT_NUMBER,
+   SOURCE_TASK_NUMBER,
+   SUBINVENTORY_NAME,
+   SUPPLIER_LOT_NUMBER,
+   TASK_NUMBER,
+   TO_PROJECT_NUMBER,
+   TO_TASK_ID,
+   TO_TASK_NUMBER,
+   TRANSACTION_DATE,
+   TRANSACTION_ID,
+   TRANSACTION_REASON_ID,
+   TRANSACTION_REASON_NAME,
+   TRANSACTION_REFERENCE,
+   TRANSACTION_SET_ID,
+   TRANSACTION_SOURCE_ID,
+   TRANSACTION_SOURCE_NAME,
+   TRANSACTION_SOURCE_TYPE_NAME,
+   TRANSACTION_TYPE_NAME,
+   TRANSACTION_UOM,
+   TRANSFER_ORGANIZATION_NAME,
+   TRANSFER_SUBINVENTORY_NAME,
+   TRANSFER_TRANSACTION_ID,
+   WAYBILL_NUMBER,
+   WIP_ENTITY_ID,
+   TRANSACTION_DATE_DAY,
+   TRANSACTION_DATE_MONTH,
+   TRANSACTION_DATE_QUARTER,
+   TRANSACTION_DATE_YEAR,
+   TRANSACTION_ACTION,
+   TRANSACTION_SRC_HDR,
+   INVENTORY_ITEM_NAME,
+   INVENTORY_LOCATION_NAME,
+   TRANSFER_LOCATION_NAME,
+   TRANSACTION_COSTED_FLAG,
+   PRJ_MFG_COST_COLLECT_FLG,
+   MOVE_ORDER_HEADER_ID,
+   OVERCOMPLETION_PRIMARY_QTY,
+   OVERCOMPLETION_TRANSACTION_QTY,
+   SOURCE_PROJECT_ID,
+   OPERATION_SEQUENCE_NUMBER,
+   DEPARTMENT_ID,
+   PRIMARY_QUANTITY,
+   TRANSACTION_QUANTITY
+)
+AS
+   SELECT DECODE (MMT.TRANSACTION_SOURCE_TYPE_ID,
+                  6, MMT.TRANSACTION_SOURCE_ID,
+                  TO_NUMBER (NULL))
+             ACCOUNT_ALIAS_ID,
+          DECODE (MMT.TRANSACTION_SOURCE_TYPE_ID,
+                  3, MMT.TRANSACTION_SOURCE_ID,
+                  TO_NUMBER (NULL))
+             ACCOUNT_ID,
+          BOM2.ALTERNATE_BOM_DESIGNATOR,
+          RTG2.ALTERNATE_ROUTING_DESIGNATOR ALTERNATE_RTG_DESIGNATOR,
+          MMT.COMPLETION_TRANSACTION_ID,
+          CCT.COST_TYPE,
+          CST.ITEM_COST UNIT_COST,
+          DECODE (MMT.TRANSACTION_SOURCE_TYPE_ID,
+                  11, MMT.TRANSACTION_SOURCE_ID,
+                  TO_NUMBER (NULL))
+             COST_UPDATE_ID,
+          MMT.CURRENCY_CODE,
+          DECODE (MMT.TRANSACTION_SOURCE_TYPE_ID,
+                  9, MMT.TRANSACTION_SOURCE_ID,
+                  TO_NUMBER (NULL))
+             CYCLE_COUNT_HEADER_ID,
+          BMD.DEPARTMENT_CODE,
+          MMT.ERROR_CODE,
+          MMT.ERROR_EXPLANATION,
+          MMT.EXPENDITURE_TYPE,
+          MMT.FREIGHT_CODE,
+          MMT.MOVE_TRANSACTION_ID,
+          MMT.NUMBER_OF_CONTAINERS,
+          HOU1.NAME,
+          CCG.COST_GROUP ORG_COST_GROUP,
+          MMT.OVERCOMPLETION_TRANSACTION_ID,
+          HOU3.NAME PA_EXPENDITURE_ORG_NAME,
+          DECODE (MMT.TRANSACTION_SOURCE_TYPE_ID,
+                  9, MMT.TRANSACTION_SOURCE_ID,
+                  TO_NUMBER (NULL))
+             PHYSICAL_INVENTORY_ID,
+          DECODE (MMT.TRANSACTION_SOURCE_TYPE_ID,
+                  1, MMT.TRANSACTION_SOURCE_ID,
+                  TO_NUMBER (NULL))
+             PO_HEADER_ID,
+          MSIB.SEGMENT1,
+          MSIB.PRIMARY_UOM_CODE PRIMARY_UOM,
+          NULL,
+          NULL,
+          PJM1.SEGMENT1 PROJECT_NUMBER,
+          MMT.RCV_TRANSACTION_ID,
+          DECODE (MMT.TRANSACTION_SOURCE_TYPE_ID,
+                  7, MMT.TRANSACTION_SOURCE_ID,
+                  TO_NUMBER (NULL))
+             REQUISITION_HEADER_ID,
+          MMT.REVISION,
+          DECODE (MMT.TRANSACTION_SOURCE_TYPE_ID,
+                  2, MMT.TRANSACTION_SOURCE_ID,
+                  8, MMT.TRANSACTION_SOURCE_ID,
+                  12, MMT.TRANSACTION_SOURCE_ID,
+                  TO_NUMBER (NULL))
+             SALES_ORDER_ID,
+          MMT.SHIPMENT_NUMBER,
+          MMT.SOURCE_CODE,
+          MMT.SOURCE_LINE_ID,
+          PJM2.SEGMENT1 SOURCE_PROJECT_NUMBER,
+          PTS2.TASK_NUMBER SOURCE_TASK_NUMBER,
+          MMT.SUBINVENTORY_CODE SUBINVENTORY_NAME,
+          MMT.VENDOR_LOT_NUMBER SUPPLIER_LOT_NUMBER,
+          PTS1.TASK_NUMBER,
+          PJM3.SEGMENT1 TO_PROJECT_NUMBER,
+          MMT.TO_TASK_ID,
+          PTS3.TASK_NUMBER TO_TASK_NUMBER,
+          MMT.TRANSACTION_DATE,
+          MMT.TRANSACTION_ID,
+          MMT.REASON_ID TRANSACTION_REASON_ID,
+          MTR.REASON_NAME TRANSACTION_REASON_NAME,
+          MMT.TRANSACTION_REFERENCE,
+          MMT.TRANSACTION_SET_ID,
+          MMT.TRANSACTION_SOURCE_ID,
+          MMT.TRANSACTION_SOURCE_NAME,
+          MTS.TRANSACTION_SOURCE_TYPE_NAME,
+          MTT.TRANSACTION_TYPE_NAME,
+          MMT.TRANSACTION_UOM,
+          HOU2.NAME TRANSFER_ORGANIZATION_NAME,
+          MMT.TRANSFER_SUBINVENTORY TRANSFER_SUBINVENTORY_NAME,
+          MMT.TRANSFER_TRANSACTION_ID,
+          MMT.WAYBILL_AIRBILL WAYBILL_NUMBER,
+          DECODE (MMT.TRANSACTION_SOURCE_TYPE_ID,
+                  5, MMT.TRANSACTION_SOURCE_ID,
+                  TO_NUMBER (NULL))
+             WIP_ENTITY_ID,
+          (DECODE (
+              MMT.TRANSACTION_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (MMT.TRANSACTION_DATE, 'DD'), 'DD')
+                 || '190001',
+                 'DDYYYYMM')))
+             TRANSACTION_DATE_DAY,
+          (DECODE (
+              MMT.TRANSACTION_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MMT.TRANSACTION_DATE, 'MM'), 'MM') || '1900',
+                 'MMYYYY')))
+             TRANSACTION_DATE_MONTH,
+          (DECODE (
+              MMT.TRANSACTION_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (MMT.TRANSACTION_DATE, 'Q'), 'MM') || '1900',
+                 'MMYYYY')))
+             TRANSACTION_DATE_QUARTER,
+          (DECODE (
+              MMT.TRANSACTION_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (MMT.TRANSACTION_DATE, 'YYYY'), 'YYYY')
+                 || '01',
+                 'YYYYMM')))
+             TRANSACTION_DATE_YEAR,
+          DECODE (MMT.TRANSACTION_ACTION_ID,
+                  '1', 'Issue from stores',
+                  '12', 'Intransit receipt',
+                  '2', 'Subinventory transfer',
+                  '21', 'Intransit shipment',
+                  '24', 'Cost update',
+                  '27', 'Receipt into stores',
+                  '28', 'Staging transfer',
+                  '29', 'Delivery adjustments',
+                  '3', 'Direct organization transfer',
+                  '30', 'WIP scrap transaction',
+                  '31', 'Assembly completion',
+                  '32', 'Assembly return',
+                  '33', 'Negative component issue',
+                  '34', 'Negative component return',
+                  '35', 'Container transaction',
+                  '4', 'Cycle count adjustment',
+                  '40', 'Lot Split',
+                  '41', 'Lot Merge',
+                  '42', 'Lot Translate',
+                  '43', 'Lot Update Quantity',
+                  '5', 'Planning Transfer',
+                  '50', 'Container Pack',
+                  '51', 'Container Unpack',
+                  '52', 'Container Split',
+                  '55', 'Cost Group Transfer',
+                  '6', 'Ownership Transfer',
+                  '8', 'Physical inventory adjustment',
+                  NULL)
+             TRANSACTION_ACTION,
+          --INV_OBJECT_GENEALOGY.getSource (MMT.ORGANIZATION_ID,
+          --                                         MMT.TRANSACTION_SOURCE_TYPE_ID,
+          --                                        MMT.TRANSACTION_SOURCE_ID) TRANSACTION_SRC_HDR,
+          NULL,
+          NULL,
+          NULL,
+          NULL,
+          DECODE (
+             DECODE (MMT.COSTED_FLAG,  NULL, 1,  'Y', 1,  'N', 2,  'E', 3),
+             '1', 'Yes',
+             '2', 'No',
+             '3', 'Error',
+             '4', 'W',
+             NULL)
+             TRANSCTN_CSTD_FLG,
+          DECODE (
+             DECODE (
+                MMT.SOURCE_PROJECT_ID,
+                NULL, DECODE (
+                         MMT.PROJECT_ID,
+                         NULL, NULL,
+                         DECODE (MMT.PM_COST_COLLECTED,
+                                 NULL, 1,
+                                 'Y', 1,
+                                 'N', 2,
+                                 'E', 3,
+                                 1)),
+                DECODE (MMT.PM_COST_COLLECTED,
+                        NULL, 1,
+                        'Y', 1,
+                        'N', 2,
+                        'E', 3,
+                        1)),
+             '1', 'Yes',
+             '2', 'No',
+             '3', 'Error',
+             '4', 'W',
+             NULL)
+             PRJ_MFG_CST_COLT_FLG,
+          DECODE (MMT.TRANSACTION_SOURCE_TYPE_ID,
+                  4, MMT.TRANSACTION_SOURCE_ID,
+                  TO_NUMBER (NULL))
+             MOVE_ORDER_HEADER_ID,
+          MMT.OVERCOMPLETION_TRANSACTION_QTY,
+          MMT.OVERCOMPLETION_TRANSACTION_QTY,
+          MMT.SOURCE_PROJECT_ID,
+          MMT.OPERATION_SEQ_NUM,
+          MMT.DEPARTMENT_ID,
+          MMT.PRIMARY_QUANTITY,
+          MMT.TRANSACTION_QUANTITY
+     FROM BOM_DEPARTMENTS BMD,
+          MTL_TRANSACTION_REASONS MTR,
+          PA_PROJECTS_ALL PJM1,
+          PA_TASKS PTS1,
+          PA_PROJECTS_ALL PJM2,
+          PA_TASKS PTS2,
+          PA_PROJECTS_ALL PJM3,
+          PA_TASKS PTS3,
+          HR_ALL_ORGANIZATION_UNITS HOU3,
+          HR_ALL_ORGANIZATION_UNITS HOU2,
+          HR_ALL_ORGANIZATION_UNITS HOU1,
+          MTL_SYSTEM_ITEMS MSIB,
+          MTL_ITEM_LOCATIONS MIL1,
+          MTL_ITEM_LOCATIONS MIL2,
+          MTL_TXN_SOURCE_TYPES MTS,
+          MTL_TRANSACTION_TYPES MTT,
+          BOM_BILL_OF_MATERIALS BOM1,
+          BOM_BILL_OF_MATERIALS BOM2,
+          BOM_OPERATIONAL_ROUTINGS RTG1,
+          BOM_OPERATIONAL_ROUTINGS RTG2,
+          CST_COST_GROUPS CCG,
+          CST_COST_TYPES CCT,
+          CST_ITEM_COSTS CST,
+          MTL_MATERIAL_TRANSACTIONS MMT
+    WHERE     MTT.TRANSACTION_TYPE_ID = MMT.TRANSACTION_TYPE_ID
+          AND MTS.TRANSACTION_SOURCE_TYPE_ID = MMT.TRANSACTION_SOURCE_TYPE_ID
+          AND MSIB.INVENTORY_ITEM_ID = MMT.INVENTORY_ITEM_ID
+          AND MSIB.ORGANIZATION_ID = MMT.ORGANIZATION_ID
+          AND MIL1.INVENTORY_LOCATION_ID(+) = MMT.LOCATOR_ID
+          AND MIL2.INVENTORY_LOCATION_ID(+) = MMT.TRANSFER_LOCATOR_ID
+          AND HOU1.ORGANIZATION_ID = MMT.ORGANIZATION_ID
+          AND HOU2.ORGANIZATION_ID(+) = MMT.TRANSFER_ORGANIZATION_ID
+          AND HOU3.ORGANIZATION_ID(+) = MMT.PA_EXPENDITURE_ORG_ID
+          AND PJM1.PROJECT_ID(+) = MMT.PROJECT_ID
+          AND PTS1.PROJECT_ID(+) = MMT.PROJECT_ID
+          AND PTS1.TASK_ID(+) = MMT.TASK_ID
+          AND PJM2.PROJECT_ID(+) = MMT.SOURCE_PROJECT_ID
+          AND PTS2.PROJECT_ID(+) = MMT.SOURCE_PROJECT_ID
+          AND PTS2.TASK_ID(+) = MMT.SOURCE_TASK_ID
+          AND PJM3.PROJECT_ID(+) = MMT.TO_PROJECT_ID
+          AND PTS3.PROJECT_ID(+) = MMT.TO_PROJECT_ID
+          AND PTS3.TASK_ID(+) = MMT.TO_TASK_ID
+          AND MTR.REASON_ID(+) = MMT.REASON_ID
+          AND BMD.DEPARTMENT_ID(+) = MMT.DEPARTMENT_ID
+          AND BOM1.COMMON_BILL_SEQUENCE_ID(+) = MMT.COMMON_BOM_SEQ_ID
+          AND BOM2.BILL_SEQUENCE_ID(+) = BOM1.COMMON_BILL_SEQUENCE_ID
+          AND RTG1.COMMON_ROUTING_SEQUENCE_ID(+) = MMT.COMMON_ROUTING_SEQ_ID
+          AND RTG2.ROUTING_SEQUENCE_ID(+) = RTG1.COMMON_ROUTING_SEQUENCE_ID
+          AND CCG.COST_GROUP_ID(+) = MMT.ORG_COST_GROUP_ID
+          --AND CCT.COST_TYPE_ID(+) = MMT.COST_TYPE_ID
+          AND MSIB.INVENTORY_ITEM_ID = CST.INVENTORY_ITEM_ID
+          AND HOU1.ORGANIZATION_ID = CST.ORGANIZATION_ID
+          --AND UPPER (CCT.COST_TYPE) = 'FROZEN'
+          AND CCT.COST_TYPE_ID = CST.COST_TYPE_ID
+          --AND HR_SECURITY.SHOW_BIS_RECORD (MMT.ORGANIZATION_ID) = 'TRUE'
+          AND MMT.ORGANIZATION_ID =
+                 NVL (MMT.OWNING_ORGANIZATION_ID, MMT.ORGANIZATION_ID)
+          AND NVL (MMT.OWNING_TP_TYPE, 2) = 2;
+
+
+CREATE OR REPLACE SYNONYM ETLEBSUSER.XX_BI_FI_MAT_TXN_V FOR APPS.XX_BI_FI_MAT_TXN_V;
+
+
+CREATE OR REPLACE SYNONYM XXAPPSREAD.XX_BI_FI_MAT_TXN_V FOR APPS.XX_BI_FI_MAT_TXN_V;
+
+
+CREATE OR REPLACE SYNONYM XXBI.XX_BI_FI_MAT_TXN_V FOR APPS.XX_BI_FI_MAT_TXN_V;
+
+
+CREATE OR REPLACE SYNONYM XXINTG.XX_BI_FI_MAT_TXN_V FOR APPS.XX_BI_FI_MAT_TXN_V;
+
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_FI_MAT_TXN_V TO ETLEBSUSER;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_FI_MAT_TXN_V TO XXAPPSREAD;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_FI_MAT_TXN_V TO XXINTG;

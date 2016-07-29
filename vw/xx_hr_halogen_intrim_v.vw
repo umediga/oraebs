@@ -1,0 +1,164 @@
+DROP VIEW APPS.XX_HR_HALOGEN_INTRIM_V;
+
+/* Formatted on 6/6/2016 4:58:33 PM (QP5 v5.277) */
+CREATE OR REPLACE FORCE VIEW APPS.XX_HR_HALOGEN_INTRIM_V
+(
+   USER_NAME,
+   EMAIL_ADDRESS,
+   FIRST_NAME,
+   LAST_NAME,
+   MIDDLE_NAMES,
+   PASSWORD,
+   HIRE_DATE,
+   JOB_NAME,
+   POSITION_TITLE,
+   DEPARTMENT,
+   SUPERVISOR_ID,
+   HR_REPRESENTATIVE,
+   CAREER_COACH,
+   LOCATION_CODE,
+   EMPLOYEE_NUMBER,
+   DEACTIVATE,
+   COUNTRY
+)
+AS
+   SELECT DECODE (INSTR (USR.USER_NAME, '@'), 0, USR.USER_NAME, NULL)
+             USER_NAME,
+          PER.EMAIL_ADDRESS,
+          PER.FIRST_NAME,
+          PER.LAST_NAME,
+          PER.MIDDLE_NAMES,
+          'welcome1' password,
+          NVL (PPS.ADJUSTED_SVC_DATE,
+               NVL (pps.date_start, PER.ORIGINAL_DATE_OF_HIRE))
+             HIRE_DATE,
+          PJB.name JOB_NAME,
+          PAP.name POSITION_TITLE,
+          HRO.name DEPARTMENT,
+          DECODE (INSTR (MRG_USR.USER_NAME, '@'), 0, MRG_USR.USER_NAME, NULL)
+             SUPERVISOR_ID,
+          HRR_USR.USER_NAME HR_REPRESENTATIVE,
+          CCO_USR.USER_NAME CAREER_COACH,
+          LOC.LOCATION_CODE,
+          PER.EMPLOYEE_NUMBER,
+          DECODE (PPT.SYSTEM_PERSON_TYPE, 'EX_EMP', 'Y', 'N') DEACTIVATE,
+          LOC.COUNTRY
+     FROM PER_ALL_PEOPLE_F PER,
+          PER_ALL_ASSIGNMENTS_F PAAF,
+          PER_JOBS PJB,
+          HR_ALL_ORGANIZATION_UNITS HRO,
+          HR_LOCATIONS_ALL LOC,
+          FND_USER USR,
+          PER_ALL_POSITIONS PAP,
+          PER_PERSON_TYPES PPT,
+          FND_USER MRG_USR,
+          PER_ALL_POSITIONS HRR_PAP,
+          PER_ALL_ASSIGNMENTS_F HRR_PAAF,
+          FND_USER HRR_USR,
+          PER_ALL_POSITIONS CCO_PAP,
+          PER_ALL_ASSIGNMENTS_F CCO_PAAF,
+          FND_USER CCO_USR,
+          PER_PERIODS_OF_SERVICE PPS
+    WHERE     SYSDATE BETWEEN PER.EFFECTIVE_START_DATE
+                          AND PER.EFFECTIVE_END_DATE
+          AND SYSDATE BETWEEN PAAF.EFFECTIVE_START_DATE
+                          AND PAAF.EFFECTIVE_END_DATE
+          AND PAAF.ASSIGNMENT_TYPE = 'E'
+          AND paaf.primary_flag = 'Y'
+          AND (USR.EMPLOYEE_ID, NVL (USR.END_DATE, SYSDATE)) IN
+                 (  SELECT USR1.EMPLOYEE_ID, NVL (MAX (USR1.END_DATE), SYSDATE)
+                      FROM FND_USER USR1
+                     WHERE USR.EMPLOYEE_ID = USR1.EMPLOYEE_ID
+                  GROUP BY USR1.EMPLOYEE_ID)
+          AND (MRG_USR.EMPLOYEE_ID, NVL (MRG_USR.END_DATE, SYSDATE)) IN
+                 (  SELECT MRG_USR1.EMPLOYEE_ID,
+                           NVL (MAX (MRG_USR1.END_DATE), SYSDATE)
+                      FROM FND_USER MRG_USR1
+                     WHERE MRG_USR.EMPLOYEE_ID = MRG_USR1.EMPLOYEE_ID
+                  GROUP BY MRG_USR1.EMPLOYEE_ID)
+          AND PER.PERSON_ID = PAAF.PERSON_ID
+          AND PAAF.JOB_ID = PJB.JOB_ID
+          AND PAAF.ORGANIZATION_ID = HRO.ORGANIZATION_ID
+          AND PAAF.LOCATION_ID = LOC.LOCATION_ID
+          AND PER.PERSON_ID = USR.EMPLOYEE_ID
+          AND PAP.POSITION_ID = PAAF.POSITION_ID
+          AND PPT.PERSON_TYPE_ID = PER.PERSON_TYPE_ID
+          AND PAAF.SUPERVISOR_ID = MRG_USR.EMPLOYEE_ID
+          --AND sysdate BETWEEN PAP.DATE_EFFECTIVE AND NVL(PAP.DATE_END,sysdate)
+          --AND sysdate BETWEEN PJB.DATE_FROM AND NVL(PJB.DATE_TO,sysdate)
+          AND SYSDATE BETWEEN HRO.DATE_FROM AND NVL (HRO.DATE_TO, SYSDATE)
+          AND NVL (INACTIVE_DATE, SYSDATE) >= SYSDATE
+          AND HRR_PAP.POSITION_ID = PAP.ATTRIBUTE5
+          AND (HRR_PAP.POSITION_ID, NVL (HRR_PAP.DATE_END, SYSDATE)) IN
+                 (  SELECT HRR_PAP1.POSITION_ID,
+                           MAX (NVL (HRR_PAP1.DATE_END, SYSDATE))
+                      FROM PER_ALL_POSITIONS HRR_PAP1
+                     WHERE     HRR_PAP1.POSITION_ID = HRR_PAP.POSITION_ID
+                           AND HRR_PAP1.DATE_EFFECTIVE <= SYSDATE
+                  GROUP BY HRR_PAP1.POSITION_ID)
+          AND HRR_PAP.POSITION_ID = HRR_PAAF.POSITION_ID
+          AND (HRR_PAAF.PERSON_ID, HRR_PAAF.EFFECTIVE_END_DATE) IN
+                 (  SELECT HRR_PAAF1.PERSON_ID,
+                           MAX (HRR_PAAF1.EFFECTIVE_END_DATE)
+                      FROM PER_ALL_ASSIGNMENTS_F HRR_PAAF1
+                     WHERE     HRR_PAAF1.PERSON_ID = HRR_PAAF.PERSON_ID
+                           AND HRR_PAAF1.POSITION_ID = HRR_PAAF.POSITION_ID
+                           AND HRR_PAAF1.EFFECTIVE_START_DATE <= SYSDATE
+                  GROUP BY HRR_PAAF1.PERSON_ID)
+          AND HRR_PAAF.PERSON_ID = HRR_USR.EMPLOYEE_ID
+          AND (HRR_USR.EMPLOYEE_ID, NVL (HRR_USR.END_DATE, SYSDATE)) IN
+                 (  SELECT HRR_USR1.EMPLOYEE_ID,
+                           NVL (MAX (HRR_USR1.END_DATE), SYSDATE)
+                      FROM FND_USER HRR_USR1
+                     WHERE HRR_USR.EMPLOYEE_ID = HRR_USR1.EMPLOYEE_ID
+                  GROUP BY HRR_USR1.EMPLOYEE_ID)
+          AND CCO_PAP.POSITION_ID = PAP.ATTRIBUTE6
+          AND (CCO_PAP.POSITION_ID, NVL (CCO_PAP.DATE_END, SYSDATE)) IN
+                 (  SELECT CCO_PAP1.POSITION_ID,
+                           MAX (NVL (CCO_PAP1.DATE_END, SYSDATE))
+                      FROM PER_ALL_POSITIONS CCO_PAP1
+                     WHERE     CCO_PAP.POSITION_ID = CCO_PAP1.POSITION_ID
+                           AND CCO_PAP1.DATE_EFFECTIVE <= SYSDATE
+                  GROUP BY CCO_PAP1.POSITION_ID)
+          AND CCO_PAP.POSITION_ID = CCO_PAAF.POSITION_ID
+          AND (CCO_PAAF.PERSON_ID, CCO_PAAF.EFFECTIVE_END_DATE) IN
+                 (  SELECT CCO_PAAF1.PERSON_ID,
+                           MAX (CCO_PAAF1.EFFECTIVE_END_DATE)
+                      FROM PER_ALL_ASSIGNMENTS_F CCO_PAAF1
+                     WHERE     CCO_PAAF1.PERSON_ID = CCO_PAAF.PERSON_ID
+                           AND CCO_PAAF1.POSITION_ID = CCO_PAAF.POSITION_ID
+                           AND CCO_PAAF1.EFFECTIVE_START_DATE <= SYSDATE
+                  GROUP BY CCO_PAAF1.PERSON_ID)
+          AND CCO_PAAF.PERSON_ID = CCO_USR.EMPLOYEE_ID
+          AND (CCO_USR.EMPLOYEE_ID, NVL (CCO_USR.END_DATE, SYSDATE)) IN
+                 (  SELECT CCO_USR1.EMPLOYEE_ID,
+                           NVL (MAX (CCO_USR1.END_DATE), SYSDATE)
+                      FROM FND_USER CCO_USR1
+                     WHERE CCO_USR.EMPLOYEE_ID = CCO_USR1.EMPLOYEE_ID
+                  GROUP BY CCO_USR1.EMPLOYEE_ID)
+          AND PPS.PERSON_ID = PER.PERSON_ID
+          AND (PPS.PERSON_ID, PPS.DATE_START) IN
+                 (  SELECT PPS1.PERSON_ID, MAX (PPS1.DATE_START)
+                      FROM PER_PERIODS_OF_SERVICE PPS1
+                     WHERE PPS1.PERSON_ID = PPS.PERSON_ID
+                  GROUP BY PPS1.PERSON_ID)
+          AND PER.EMPLOYEE_NUMBER NOT IN (115013,
+                                          99999,
+                                          99998,
+                                          99997)
+          AND PAAF.EMPLOYMENT_CATEGORY NOT IN ('FINT',
+                                               'PINT',
+                                               'FCOOP',
+                                               'PCOOP')
+          AND PPT.SYSTEM_PERSON_TYPE IN ('EX_EMP',
+                                         'EMP',
+                                         'EX_EMP_APL',
+                                         'EMP_APL')
+          AND (   (    PPT.SYSTEM_PERSON_TYPE IN ('EX_EMP', 'EX_EMP_APL')
+                   AND (SYSDATE - PER.EFFECTIVE_START_DATE) < 60)
+               OR PPT.SYSTEM_PERSON_TYPE IN ('EMP', 'EMP_APL'));
+
+
+GRANT SELECT ON APPS.XX_HR_HALOGEN_INTRIM_V TO XXAPPSHRRO;
+
+GRANT SELECT ON APPS.XX_HR_HALOGEN_INTRIM_V TO XXAPPSREAD;

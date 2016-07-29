@@ -1,0 +1,704 @@
+DROP PACKAGE APPS.XX_INV_ITEMONHANDQTY_PKG;
+
+CREATE OR REPLACE PACKAGE APPS."XX_INV_ITEMONHANDQTY_PKG" AS
+----------------------------------------------------------------------
+/*
+ Created By     : Mou Mukherjee
+ Creation Date  : 27-Feb-2012
+ File Name      : XXINVITEMONHANDTL.pks
+ Description    : This script creates the specification of the package xx_inv_itemonhandqty_pkg
+
+Change History:
+
+Version Date        Name		Remarks
+------- --------- ------------		---------------------------------------
+1.0     27-Feb-2012 Mou Mukherjee       Initial development.
+1.1     22-MAR-2012 Mou Mukherjee       Included the extra fields as per new data mapping
+1.2     19-JUN-2013 Mou Mukherjee       Added source_system_name - wave1
+1.3     11-SEP-2013 Mou Mukherjee       Added place_of_origin
+1.4     27-JAN-2014 Mou Mukherjee	Populating 'Comp Source Country' in Attribute_Category field - wave1
+*/
+----------------------------------------------------------------------
+
+
+        G_STAGE         VARCHAR2(2000);
+        G_BATCH_ID      VARCHAR2(200);
+	G_VALIDATE_AND_LOAD	VARCHAR2(100) := 'VALIDATE_AND_LOAD';
+	g_process_name          VARCHAR2(60)  := 'XXINVITEMONHANDCNV';
+	G_PROCESS_FLAG          NUMBER;
+	G_STATUS_NAME        VARCHAR2(30);
+	G_STATUS_ID             NUMBER;
+	G_SOURCE_CODE           VARCHAR2(30);
+	G_TRANS_MODE            NUMBER;
+	G_TRANS_SOURCE_NAME    VARCHAR2(100); -- 16th-Aug-2012
+	G_ATTRIBUTE_CAT        VARCHAR2(100); -- 27th-Jan-2014
+        
+TYPE G_XX_INV_ITEMQOH_REC_TYPE IS RECORD
+( 
+   REC_TYPE                                VARCHAR2(1)
+  ,REC_CNT                                 NUMBER
+  ,MTL_TRX_INFC_STG_ID                     NUMBER
+  ,INVENTORY_ITEM_ID                       NUMBER
+  ,ITEM_SEGMENT1                           VARCHAR2(40)
+  ,ITEM_SEGMENT2			   VARCHAR2(40)
+  ,ITEM_SEGMENT3			   VARCHAR2(40)
+  ,ITEM_SEGMENT4                           VARCHAR2(40)
+  ,ITEM_SEGMENT5                           VARCHAR2(40)
+  ,ITEM_SEGMENT6                           VARCHAR2(40)
+  ,ITEM_SEGMENT7                           VARCHAR2(40)
+  ,ITEM_SEGMENT8                           VARCHAR2(40)
+  ,ITEM_SEGMENT9                           VARCHAR2(40)
+  ,ITEM_SEGMENT10                          VARCHAR2(40)
+  ,ITEM_SEGMENT11			   VARCHAR2(40)
+  ,ITEM_SEGMENT12                          VARCHAR2(40)
+  ,ITEM_SEGMENT13                          VARCHAR2(40)
+  ,ITEM_SEGMENT14                          VARCHAR2(40)
+  ,ITEM_SEGMENT15                          VARCHAR2(40)
+  ,ITEM_SEGMENT16                          VARCHAR2(40)
+  ,ITEM_SEGMENT17                          VARCHAR2(40)
+  ,ITEM_SEGMENT18                          VARCHAR2(40)
+  ,ITEM_SEGMENT19                          VARCHAR2(40)
+  ,ITEM_SEGMENT20                          VARCHAR2(40)
+  ,REVISION                                VARCHAR2(3)
+  ,ORGANIZATION_ID                         NUMBER
+  ,ORGANIZATION_NAME                       VARCHAR2(30)
+  ,TRANSACTION_QUANTITY                    NUMBER
+  ,PRIMARY_QUANTITY                        NUMBER
+  ,TRANSACTION_UOM                         VARCHAR2(3)
+  ,TRANSACTION_DATE                        DATE
+  ,ACCT_PERIOD_ID                          NUMBER
+  ,SUBINVENTORY_CODE                       VARCHAR2(10)
+  ,LOCATOR_ID                              NUMBER
+  ,LOC_SEGMENT1                            VARCHAR2(40)
+  ,LOC_SEGMENT2                            VARCHAR2(40)
+  ,LOC_SEGMENT3                            VARCHAR2(40)
+  ,LOC_SEGMENT4                            VARCHAR2(40)
+  ,LOC_SEGMENT5                            VARCHAR2(40)
+  ,LOC_SEGMENT6                            VARCHAR2(40)
+  ,LOC_SEGMENT7                            VARCHAR2(40)
+  ,LOC_SEGMENT8                            VARCHAR2(40)
+  ,LOC_SEGMENT9                            VARCHAR2(40)
+  ,LOC_SEGMENT10                           VARCHAR2(40)
+  ,LOC_SEGMENT11                           VARCHAR2(40)
+  ,LOC_SEGMENT12                           VARCHAR2(40)
+  ,LOC_SEGMENT13                           VARCHAR2(40)
+  ,LOC_SEGMENT14                           VARCHAR2(40)
+  ,LOC_SEGMENT15                           VARCHAR2(40)
+  ,LOC_SEGMENT16                           VARCHAR2(40)
+  ,LOC_SEGMENT17                           VARCHAR2(40)
+  ,LOC_SEGMENT18                           VARCHAR2(40)
+  ,LOC_SEGMENT19                           VARCHAR2(40)
+  ,LOC_SEGMENT20                           VARCHAR2(40)
+  ,TRANSACTION_SOURCE_ID                   NUMBER
+  ,DSP_SEGMENT1                            VARCHAR2(40)
+  ,DSP_SEGMENT2                            VARCHAR2(40)
+  ,DSP_SEGMENT3                            VARCHAR2(40)
+  ,DSP_SEGMENT4                            VARCHAR2(40)
+  ,DSP_SEGMENT5                            VARCHAR2(40)
+  ,DSP_SEGMENT6                            VARCHAR2(40)
+  ,DSP_SEGMENT7                            VARCHAR2(40)
+  ,DSP_SEGMENT8                            VARCHAR2(40)
+  ,DSP_SEGMENT9                            VARCHAR2(40)
+  ,DSP_SEGMENT10                           VARCHAR2(40)
+  ,DSP_SEGMENT11                           VARCHAR2(40)
+  ,DSP_SEGMENT12                           VARCHAR2(40)
+  ,DSP_SEGMENT13                           VARCHAR2(40)
+  ,DSP_SEGMENT14                           VARCHAR2(40)
+  ,DSP_SEGMENT15                           VARCHAR2(40)
+  ,DSP_SEGMENT16                           VARCHAR2(40)
+  ,DSP_SEGMENT17                           VARCHAR2(40)
+  ,DSP_SEGMENT18                           VARCHAR2(40)
+  ,DSP_SEGMENT19                           VARCHAR2(40)
+  ,DSP_SEGMENT20                           VARCHAR2(40)
+  ,DSP_SEGMENT21                           VARCHAR2(40)
+  ,DSP_SEGMENT22                           VARCHAR2(40)
+  ,DSP_SEGMENT23                           VARCHAR2(40)
+  ,DSP_SEGMENT24                           VARCHAR2(40)
+  ,DSP_SEGMENT25                           VARCHAR2(40)
+  ,DSP_SEGMENT26                           VARCHAR2(40)
+  ,DSP_SEGMENT27                           VARCHAR2(40)
+  ,DSP_SEGMENT28                           VARCHAR2(40)
+  ,DSP_SEGMENT29                           VARCHAR2(40)
+  ,DSP_SEGMENT30                           VARCHAR2(40)
+  ,TRANSACTION_SOURCE_NAME                 VARCHAR2(80)
+  ,TRANSACTION_SOURCE_TYPE_ID              NUMBER
+  ,TRANSACTION_ACTION_ID                   NUMBER
+  ,TRANSACTION_TYPE_ID                     NUMBER
+  ,REASON_ID                               NUMBER
+  ,TRANSACTION_REFERENCE                   VARCHAR2(240)
+  ,TRANSACTION_COST                        NUMBER
+  ,DISTRIBUTION_ACCOUNT_ID                 NUMBER
+  ,DST_SEGMENT1                            VARCHAR2(25)
+  ,DST_SEGMENT2                            VARCHAR2(25)
+  ,DST_SEGMENT3                            VARCHAR2(25)
+  ,DST_SEGMENT4                            VARCHAR2(25)
+  ,DST_SEGMENT5                            VARCHAR2(25)
+  ,DST_SEGMENT6                            VARCHAR2(25)
+  ,DST_SEGMENT7                            VARCHAR2(25)
+  ,DST_SEGMENT8                            VARCHAR2(25)
+  ,DST_SEGMENT9                            VARCHAR2(25)
+  ,DST_SEGMENT10                           VARCHAR2(25)
+  ,DST_SEGMENT11                           VARCHAR2(25)
+  ,DST_SEGMENT12                           VARCHAR2(25)
+  ,DST_SEGMENT13                           VARCHAR2(25)
+  ,DST_SEGMENT14                           VARCHAR2(25)
+  ,DST_SEGMENT15                           VARCHAR2(25)
+  ,DST_SEGMENT16                           VARCHAR2(25)
+  ,DST_SEGMENT17                           VARCHAR2(25)
+  ,DST_SEGMENT18                           VARCHAR2(25)
+  ,DST_SEGMENT19                           VARCHAR2(25)
+  ,DST_SEGMENT20                           VARCHAR2(25)
+  ,DST_SEGMENT21                           VARCHAR2(25)
+  ,DST_SEGMENT22                           VARCHAR2(25)
+  ,DST_SEGMENT23                           VARCHAR2(25)
+  ,DST_SEGMENT24                           VARCHAR2(25)
+  ,DST_SEGMENT25                           VARCHAR2(25)
+  ,DST_SEGMENT26                           VARCHAR2(25)
+  ,DST_SEGMENT27                           VARCHAR2(25)
+  ,DST_SEGMENT28                           VARCHAR2(25)
+  ,DST_SEGMENT29                           VARCHAR2(25)
+  ,DST_SEGMENT30                           VARCHAR2(25)
+  ,REQUISITION_LINE_ID                     NUMBER
+  ,CURRENCY_CODE                           VARCHAR2(30)
+  ,CURRENCY_CONVERSION_DATE                DATE
+  ,CURRENCY_CONVERSION_TYPE                VARCHAR2(30)
+  ,CURRENCY_CONVERSION_RATE                NUMBER
+  ,USSGL_TRANSACTION_CODE                  VARCHAR2(30)
+  ,WIP_ENTITY_TYPE                         NUMBER
+  ,SCHEDULE_ID                             NUMBER
+  ,EMPLOYEE_CODE                           VARCHAR2(10)
+  ,DEPARTMENT_ID                           NUMBER
+  ,SCHEDULE_UPDATE_CODE                    NUMBER
+  ,SETUP_TEARDOWN_CODE                     NUMBER
+  ,PRIMARY_SWITCH                          NUMBER
+  ,MRP_CODE                                NUMBER
+  ,OPERATION_SEQ_NUM                       NUMBER
+  ,REPETITIVE_LINE_ID                      NUMBER
+  ,PICKING_LINE_ID                         NUMBER
+  ,TRX_SOURCE_LINE_ID                      NUMBER
+  ,TRX_SOURCE_DELIVERY_ID                  NUMBER
+  ,DEMAND_ID                               NUMBER
+  ,CUSTOMER_SHIP_ID                        NUMBER
+  ,LINE_ITEM_NUM                           NUMBER
+  ,RECEIVING_DOCUMENT                      VARCHAR2(10)
+  ,RCV_TRANSACTION_ID                      NUMBER
+  ,SHIP_TO_LOCATION_ID                     NUMBER
+  ,ENCUMBRANCE_ACCOUNT                     NUMBER
+  ,ENCUMBRANCE_AMOUNT                      NUMBER
+  ,VENDOR_LOT_NUMBER                       VARCHAR2(30)
+  ,TRANSFER_SUBINVENTORY                   VARCHAR2(10)
+  ,TRANSFER_ORGANIZATION                   NUMBER
+  ,TRANSFER_LOCATOR                        NUMBER
+  ,XFER_LOC_SEGMENT1                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT2                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT3                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT4                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT5                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT6                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT7                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT8                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT9                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT10                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT11                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT12                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT13                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT14                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT15                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT16                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT17                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT18                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT19                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT20                      VARCHAR2(40)
+  ,SHIPMENT_NUMBER                         VARCHAR2(40)
+  ,TRANSPORTATION_COST                     NUMBER
+  ,TRANSPORTATION_ACCOUNT                  NUMBER
+  ,TRANSFER_COST                           NUMBER
+  ,FREIGHT_CODE                            VARCHAR2(30)
+  ,CONTAINERS                              NUMBER
+  ,WAYBILL_AIRBILL                         VARCHAR2(20)
+  ,EXPECTED_ARRIVAL_DATE                   DATE
+  ,NEW_AVERAGE_COST                        NUMBER
+  ,VALUE_CHANGE                            NUMBER
+  ,PERCENTAGE_CHANGE                       NUMBER
+  ,DEMAND_SOURCE_HEADER_ID                 NUMBER
+  ,DEMAND_SOURCE_LINE                      VARCHAR2(30)
+  ,DEMAND_SOURCE_DELIVERY                  VARCHAR2(30)
+  ,NEGATIVE_REQ_FLAG                       NUMBER
+  ,ERROR_EXPLANATION                       VARCHAR2(240)
+  ,SHIPPABLE_FLAG                          VARCHAR2(1)
+  ,ERROR_CODE                              VARCHAR2(240)
+  ,REQUIRED_FLAG                           VARCHAR2(1)
+  ,ATTRIBUTE_CATEGORY                      VARCHAR2(30)
+  ,ATTRIBUTE1                              VARCHAR2(150)
+  ,ATTRIBUTE2                              VARCHAR2(150)
+  ,ATTRIBUTE3                              VARCHAR2(150)
+  ,ATTRIBUTE4                              VARCHAR2(150)
+  ,ATTRIBUTE5                              VARCHAR2(150)
+  ,ATTRIBUTE6                              VARCHAR2(150)
+  ,ATTRIBUTE7                              VARCHAR2(150)
+  ,ATTRIBUTE8                              VARCHAR2(150)
+  ,ATTRIBUTE9                              VARCHAR2(150)
+  ,ATTRIBUTE10                             VARCHAR2(150)
+  ,REQUISITION_DISTRIBUTION_ID             NUMBER
+  ,MOVEMENT_ID                             NUMBER
+  ,RESERVATION_QUANTITY                    NUMBER
+  ,SHIPPED_QUANTITY                        NUMBER
+  ,INVENTORY_ITEM                          VARCHAR2(2000)
+  ,LOCATOR_NAME                            VARCHAR2(2000)
+  ,TASK_ID                                 NUMBER(15)
+  ,TO_TASK_ID                              NUMBER(15)
+  ,SOURCE_TASK_ID                          NUMBER
+  ,PROJECT_ID                              NUMBER(15)
+  ,TO_PROJECT_ID                           NUMBER(15)
+  ,SOURCE_PROJECT_ID                       NUMBER
+  ,PA_EXPENDITURE_ORG_ID                   NUMBER
+  ,EXPENDITURE_TYPE                        VARCHAR2(30)
+  ,FINAL_COMPLETION_FLAG                   VARCHAR2(1)
+  ,TRANSFER_PERCENTAGE                     NUMBER
+  ,TRANSACTION_SEQUENCE_ID                 NUMBER
+  ,MATERIAL_ACCOUNT                        NUMBER
+  ,MATERIAL_OVERHEAD_ACCOUNT               NUMBER
+  ,RESOURCE_ACCOUNT                        NUMBER
+  ,OUTSIDE_PROCESSING_ACCOUNT              NUMBER
+  ,OVERHEAD_ACCOUNT                        NUMBER
+  ,BOM_REVISION                            VARCHAR2(3)
+  ,ROUTING_REVISION                        VARCHAR2(3)
+  ,BOM_REVISION_DATE                       DATE
+  ,ROUTING_REVISION_DATE                   DATE
+  ,ALTERNATE_BOM_DESIGNATOR                VARCHAR2(10)
+  ,ALTERNATE_ROUTING_DESIGNATOR            VARCHAR2(10)
+  ,ACCOUNTING_CLASS                        VARCHAR2(10)
+  ,DEMAND_CLASS                            VARCHAR2(30)
+  ,PARENT_ID                               NUMBER
+  ,SUBSTITUTION_TYPE_ID                    NUMBER
+  ,SUBSTITUTION_ITEM_ID                    NUMBER
+  ,SCHEDULE_GROUP                          NUMBER
+  ,BUILD_SEQUENCE                          NUMBER
+  ,SCHEDULE_NUMBER                         VARCHAR2(30)
+  ,SCHEDULED_FLAG                          NUMBER
+  ,FLOW_SCHEDULE                           VARCHAR2(1)
+  ,COST_GROUP_ID                           NUMBER
+  ,KANBAN_CARD_ID                          NUMBER
+  ,QA_COLLECTION_ID                        NUMBER
+  ,OVERCOMPLETION_TRANSACTION_QTY          NUMBER
+  ,OVERCOMPLETION_PRIMARY_QTY              NUMBER
+  ,OVERCOMPLETION_TRANSACTION_ID           NUMBER
+  ,END_ITEM_UNIT_NUMBER                    VARCHAR2(60)
+  ,SCHEDULED_PAYBACK_DATE                  DATE
+  ,ORG_COST_GROUP_ID                       NUMBER
+  ,COST_TYPE_ID                            NUMBER
+  ,SOURCE_LOT_NUMBER                       VARCHAR2(80)
+  ,TRANSFER_COST_GROUP_ID                  NUMBER
+  ,LPN_NUMBER                              VARCHAR2(30)
+  ,TRANSFER_LPN_ID                         NUMBER
+  ,CONTENT_LPN_ID                          NUMBER
+  ,XML_DOCUMENT_ID                         VARCHAR2(240)
+  ,ORGANIZATION_TYPE                       NUMBER
+  ,TRANSFER_ORGANIZATION_TYPE              NUMBER
+  ,OWNING_ORGANIZATION_NAME                VARCHAR2(30)
+  ,OWNING_TP_TYPE                          NUMBER
+  ,XFR_OWNING_ORGANIZATION_ID              NUMBER
+  ,TRANSFER_OWNING_TP_TYPE                 NUMBER
+  ,PLANNING_ORGANIZATION_ID                NUMBER
+  ,PLANNING_TP_TYPE                        NUMBER
+  ,XFR_PLANNING_ORGANIZATION_ID            NUMBER
+  ,TRANSFER_PLANNING_TP_TYPE               NUMBER
+  ,SECONDARY_UOM_CODE                      VARCHAR2(240)
+  ,SECONDARY_TRANSACTION_QUANTITY          NUMBER
+  ,TRANSACTION_GROUP_ID                    NUMBER
+  ,TRANSACTION_GROUP_SEQ                   NUMBER
+  ,REPRESENTATIVE_LOT_NUMBER               VARCHAR2(80)
+  ,TRANSACTION_BATCH_ID                    NUMBER
+  ,TRANSACTION_BATCH_SEQ                   NUMBER
+  ,REBUILD_ITEM_ID                         NUMBER
+  ,REBUILD_SERIAL_NUMBER                   VARCHAR2(30)
+  ,REBUILD_ACTIVITY_ID                     NUMBER
+  ,REBUILD_JOB_NAME                        VARCHAR2(240)
+  ,MOVE_TRANSACTION_ID                     NUMBER
+  ,COMPLETION_TRANSACTION_ID               NUMBER
+  ,WIP_SUPPLY_TYPE                         NUMBER
+  ,RELIEVE_RESERVATIONS_FLAG               VARCHAR2(1)
+  ,RELIEVE_HIGH_LEVEL_RSV_FLAG             VARCHAR2(1)
+  ,TRANSFER_PRICE                          NUMBER
+  ,STATUS                                  VARCHAR2(30)
+  ,REQUEST_ID                              NUMBER
+  ,OPERATING_UNIT_NAME                     VARCHAR2(250)
+  ,LOT_NUMBER                              VARCHAR2(30)
+  ,MTLI_ORIGINATION_DATE                   DATE
+  ,LOT_EXPIRATION_DATE                     DATE
+  ,STATUS_ID                               VARCHAR2(30)
+  ,MTLI_TRANSACTIONS_QUANTITY              NUMBER
+  ,MTI_TRANSACTION_UOM                     VARCHAR2(3)
+  ,MTI_OWNING_ORGANIZATION_NAME            VARCHAR2(30)
+  ,FM_SERIAL_NUMBER                        VARCHAR2(30)
+  ,MSNI_ORIGINATION_DATE                   DATE
+  ,STATUS_NAME                             VARCHAR2(30)
+  ,MTLI_PLACE_OF_ORIGIN                    VARCHAR2(150)
+  ,CREATION_DATE                           DATE 
+  ,CREATED_BY                              NUMBER
+  ,LAST_UPDATE_DATE                        DATE
+  ,LAST_UPDATED_BY                         NUMBER
+  ,BATCH_ID				   VARCHAR2(200)
+  ,RECORD_NUMBER                           NUMBER
+  ,SOURCE_SYSTEM_NAME                      VARCHAR2(150)
+  ,PROCESS_FLAG                            NUMBER
+  ,TRANSACTION_MODE                        NUMBER
+  ,TRANSACTION_TYPE_NAME                   VARCHAR2(40)
+  ,PROCESS_CODE                            VARCHAR2(100)
+  ,MTLI_STATUS_ID			   NUMBER
+  ,LAST_UPDATE_LOGIN                       NUMBER
+ );
+
+        TYPE G_XX_INV_ITEMQOH_TAB_TYPE IS TABLE OF G_XX_INV_ITEMQOH_REC_TYPE
+        INDEX BY BINARY_INTEGER;
+
+
+TYPE G_XX_INV_ITEMQOH_PRE_REC_TYPE IS RECORD
+(
+   INVENTORY_ITEM_ID                       NUMBER
+  ,ITEM_SEGMENT1                           VARCHAR2(40)
+  ,ITEM_SEGMENT2			   VARCHAR2(40)
+  ,ITEM_SEGMENT3			   VARCHAR2(40)
+  ,ITEM_SEGMENT4                           VARCHAR2(40)
+  ,ITEM_SEGMENT5                           VARCHAR2(40)
+  ,ITEM_SEGMENT6                           VARCHAR2(40)
+  ,ITEM_SEGMENT7                           VARCHAR2(40)
+  ,ITEM_SEGMENT8                           VARCHAR2(40)
+  ,ITEM_SEGMENT9                           VARCHAR2(40)
+  ,ITEM_SEGMENT10                          VARCHAR2(40)
+  ,ITEM_SEGMENT11			   VARCHAR2(40)
+  ,ITEM_SEGMENT12                          VARCHAR2(40)
+  ,ITEM_SEGMENT13                          VARCHAR2(40)
+  ,ITEM_SEGMENT14                          VARCHAR2(40)
+  ,ITEM_SEGMENT15                          VARCHAR2(40)
+  ,ITEM_SEGMENT16                          VARCHAR2(40)
+  ,ITEM_SEGMENT17                          VARCHAR2(40)
+  ,ITEM_SEGMENT18                          VARCHAR2(40)
+  ,ITEM_SEGMENT19                          VARCHAR2(40)
+  ,ITEM_SEGMENT20                          VARCHAR2(40)
+  ,REVISION                                VARCHAR2(3)
+  ,ORGANIZATION_ID                         NUMBER
+  ,ORGANIZATION_NAME                       VARCHAR2(30)  
+  ,TRANSACTION_QUANTITY                    NUMBER
+  ,PRIMARY_QUANTITY                        NUMBER
+  ,TRANSACTION_UOM                         VARCHAR2(3)
+  ,TRANSACTION_DATE                        DATE
+  ,ACCT_PERIOD_ID                          NUMBER
+  ,SUBINVENTORY_CODE                       VARCHAR2(10)
+  ,LOCATOR_ID                              NUMBER
+  ,LOC_SEGMENT1                            VARCHAR2(40)
+  ,LOC_SEGMENT2                            VARCHAR2(40)
+  ,LOC_SEGMENT3                            VARCHAR2(40)
+  ,LOC_SEGMENT4                            VARCHAR2(40)
+  ,LOC_SEGMENT5                            VARCHAR2(40)
+  ,LOC_SEGMENT6                            VARCHAR2(40)
+  ,LOC_SEGMENT7                            VARCHAR2(40)
+  ,LOC_SEGMENT8                            VARCHAR2(40)
+  ,LOC_SEGMENT9                            VARCHAR2(40)
+  ,LOC_SEGMENT10                           VARCHAR2(40)
+  ,LOC_SEGMENT11                           VARCHAR2(40)
+  ,LOC_SEGMENT12                           VARCHAR2(40)
+  ,LOC_SEGMENT13                           VARCHAR2(40)
+  ,LOC_SEGMENT14                           VARCHAR2(40)
+  ,LOC_SEGMENT15                           VARCHAR2(40)
+  ,LOC_SEGMENT16                           VARCHAR2(40)
+  ,LOC_SEGMENT17                           VARCHAR2(40)
+  ,LOC_SEGMENT18                           VARCHAR2(40)
+  ,LOC_SEGMENT19                           VARCHAR2(40)
+  ,LOC_SEGMENT20                           VARCHAR2(40)
+  ,TRANSACTION_SOURCE_ID                   NUMBER
+  ,DSP_SEGMENT1                            VARCHAR2(40)
+  ,DSP_SEGMENT2                            VARCHAR2(40)
+  ,DSP_SEGMENT3                            VARCHAR2(40)
+  ,DSP_SEGMENT4                            VARCHAR2(40)
+  ,DSP_SEGMENT5                            VARCHAR2(40)
+  ,DSP_SEGMENT6                            VARCHAR2(40)
+  ,DSP_SEGMENT7                            VARCHAR2(40)
+  ,DSP_SEGMENT8                            VARCHAR2(40)
+  ,DSP_SEGMENT9                            VARCHAR2(40)
+  ,DSP_SEGMENT10                           VARCHAR2(40)
+  ,DSP_SEGMENT11                           VARCHAR2(40)
+  ,DSP_SEGMENT12                           VARCHAR2(40)
+  ,DSP_SEGMENT13                           VARCHAR2(40)
+  ,DSP_SEGMENT14                           VARCHAR2(40)
+  ,DSP_SEGMENT15                           VARCHAR2(40)
+  ,DSP_SEGMENT16                           VARCHAR2(40)
+  ,DSP_SEGMENT17                           VARCHAR2(40)
+  ,DSP_SEGMENT18                           VARCHAR2(40)
+  ,DSP_SEGMENT19                           VARCHAR2(40)
+  ,DSP_SEGMENT20                           VARCHAR2(40)
+  ,DSP_SEGMENT21                           VARCHAR2(40)
+  ,DSP_SEGMENT22                           VARCHAR2(40)
+  ,DSP_SEGMENT23                           VARCHAR2(40)
+  ,DSP_SEGMENT24                           VARCHAR2(40)
+  ,DSP_SEGMENT25                           VARCHAR2(40)
+  ,DSP_SEGMENT26                           VARCHAR2(40)
+  ,DSP_SEGMENT27                           VARCHAR2(40)
+  ,DSP_SEGMENT28                           VARCHAR2(40)
+  ,DSP_SEGMENT29                           VARCHAR2(40)
+  ,DSP_SEGMENT30                           VARCHAR2(40)
+  ,TRANSACTION_SOURCE_NAME                 VARCHAR2(80)
+  ,TRANSACTION_SOURCE_TYPE_ID              NUMBER
+  ,TRANSACTION_ACTION_ID                   NUMBER
+  ,TRANSACTION_TYPE_ID                     NUMBER
+  ,REASON_ID                               NUMBER
+  ,TRANSACTION_REFERENCE                   VARCHAR2(240)
+  ,TRANSACTION_COST                        NUMBER
+  ,DISTRIBUTION_ACCOUNT_ID                 NUMBER
+  ,DST_SEGMENT1                            VARCHAR2(25)
+  ,DST_SEGMENT2                            VARCHAR2(25)
+  ,DST_SEGMENT3                            VARCHAR2(25)
+  ,DST_SEGMENT4                            VARCHAR2(25)
+  ,DST_SEGMENT5                            VARCHAR2(25)
+  ,DST_SEGMENT6                            VARCHAR2(25)
+  ,DST_SEGMENT7                            VARCHAR2(25)
+  ,DST_SEGMENT8                            VARCHAR2(25)
+  ,DST_SEGMENT9                            VARCHAR2(25)
+  ,DST_SEGMENT10                           VARCHAR2(25)
+  ,DST_SEGMENT11                           VARCHAR2(25)
+  ,DST_SEGMENT12                           VARCHAR2(25)
+  ,DST_SEGMENT13                           VARCHAR2(25)
+  ,DST_SEGMENT14                           VARCHAR2(25)
+  ,DST_SEGMENT15                           VARCHAR2(25)
+  ,DST_SEGMENT16                           VARCHAR2(25)
+  ,DST_SEGMENT17                           VARCHAR2(25)
+  ,DST_SEGMENT18                           VARCHAR2(25)
+  ,DST_SEGMENT19                           VARCHAR2(25)
+  ,DST_SEGMENT20                           VARCHAR2(25)
+  ,DST_SEGMENT21                           VARCHAR2(25)
+  ,DST_SEGMENT22                           VARCHAR2(25)
+  ,DST_SEGMENT23                           VARCHAR2(25)
+  ,DST_SEGMENT24                           VARCHAR2(25)
+  ,DST_SEGMENT25                           VARCHAR2(25)
+  ,DST_SEGMENT26                           VARCHAR2(25)
+  ,DST_SEGMENT27                           VARCHAR2(25)
+  ,DST_SEGMENT28                           VARCHAR2(25)
+  ,DST_SEGMENT29                           VARCHAR2(25)
+  ,DST_SEGMENT30                           VARCHAR2(25)
+  ,REQUISITION_LINE_ID                     NUMBER
+  ,CURRENCY_CODE                           VARCHAR2(30)
+  ,CURRENCY_CONVERSION_DATE                DATE
+  ,CURRENCY_CONVERSION_TYPE                VARCHAR2(30)
+  ,CURRENCY_CONVERSION_RATE                NUMBER
+  ,USSGL_TRANSACTION_CODE                  VARCHAR2(30)
+  ,WIP_ENTITY_TYPE                         NUMBER
+  ,SCHEDULE_ID                             NUMBER
+  ,EMPLOYEE_CODE                           VARCHAR2(10)
+  ,DEPARTMENT_ID                           NUMBER
+  ,SCHEDULE_UPDATE_CODE                    NUMBER
+  ,SETUP_TEARDOWN_CODE                     NUMBER
+  ,PRIMARY_SWITCH                          NUMBER
+  ,MRP_CODE                                NUMBER
+  ,OPERATION_SEQ_NUM                       NUMBER
+  ,REPETITIVE_LINE_ID                      NUMBER
+  ,PICKING_LINE_ID                         NUMBER
+  ,TRX_SOURCE_LINE_ID                      NUMBER
+  ,TRX_SOURCE_DELIVERY_ID                  NUMBER
+  ,DEMAND_ID                               NUMBER
+  ,CUSTOMER_SHIP_ID                        NUMBER
+  ,LINE_ITEM_NUM                           NUMBER
+  ,RECEIVING_DOCUMENT                      VARCHAR2(10)
+  ,RCV_TRANSACTION_ID                      NUMBER
+  ,SHIP_TO_LOCATION_ID                     NUMBER
+  ,ENCUMBRANCE_ACCOUNT                     NUMBER
+  ,ENCUMBRANCE_AMOUNT                      NUMBER
+  ,VENDOR_LOT_NUMBER                       VARCHAR2(30)
+  ,TRANSFER_SUBINVENTORY                   VARCHAR2(10)
+  ,TRANSFER_ORGANIZATION                   NUMBER
+  ,TRANSFER_LOCATOR                        NUMBER
+  ,XFER_LOC_SEGMENT1                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT2                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT3                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT4                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT5                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT6                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT7                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT8                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT9                       VARCHAR2(40)
+  ,XFER_LOC_SEGMENT10                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT11                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT12                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT13                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT14                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT15                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT16                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT17                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT18                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT19                      VARCHAR2(40)
+  ,XFER_LOC_SEGMENT20                      VARCHAR2(40)
+  ,SHIPMENT_NUMBER                         VARCHAR2(40)
+  ,TRANSPORTATION_COST                     NUMBER
+  ,TRANSPORTATION_ACCOUNT                  NUMBER
+  ,TRANSFER_COST                           NUMBER
+  ,FREIGHT_CODE                            VARCHAR2(30)
+  ,CONTAINERS                              NUMBER
+  ,WAYBILL_AIRBILL                         VARCHAR2(20)
+  ,EXPECTED_ARRIVAL_DATE                   DATE
+  ,NEW_AVERAGE_COST                        NUMBER
+  ,VALUE_CHANGE                            NUMBER
+  ,PERCENTAGE_CHANGE                       NUMBER
+  ,DEMAND_SOURCE_HEADER_ID                 NUMBER
+  ,DEMAND_SOURCE_LINE                      VARCHAR2(30)
+  ,DEMAND_SOURCE_DELIVERY                  VARCHAR2(30)
+  ,NEGATIVE_REQ_FLAG                       NUMBER
+  ,ERROR_EXPLANATION                       VARCHAR2(240)
+  ,SHIPPABLE_FLAG                          VARCHAR2(1)
+  ,ERROR_CODE                              VARCHAR2(240)
+  ,REQUIRED_FLAG                           VARCHAR2(1)
+  ,ATTRIBUTE_CATEGORY                      VARCHAR2(30)
+  ,ATTRIBUTE1                              VARCHAR2(150)
+  ,ATTRIBUTE2                              VARCHAR2(150)
+  ,ATTRIBUTE3                              VARCHAR2(150)
+  ,ATTRIBUTE4                              VARCHAR2(150)
+  ,ATTRIBUTE5                              VARCHAR2(150)
+  ,ATTRIBUTE6                              VARCHAR2(150)
+  ,ATTRIBUTE7                              VARCHAR2(150)
+  ,ATTRIBUTE8                              VARCHAR2(150)
+  ,ATTRIBUTE9                              VARCHAR2(150)
+  ,ATTRIBUTE10                             VARCHAR2(150)
+  ,REQUISITION_DISTRIBUTION_ID             NUMBER
+  ,MOVEMENT_ID                             NUMBER
+  ,RESERVATION_QUANTITY                    NUMBER
+  ,SHIPPED_QUANTITY                        NUMBER
+  ,INVENTORY_ITEM                          VARCHAR2(2000)
+  ,LOCATOR_NAME                            VARCHAR2(2000)
+  ,TASK_ID                                 NUMBER(15)
+  ,TO_TASK_ID                              NUMBER(15)
+  ,SOURCE_TASK_ID                          NUMBER
+  ,PROJECT_ID                              NUMBER(15)
+  ,TO_PROJECT_ID                           NUMBER(15)
+  ,SOURCE_PROJECT_ID                       NUMBER
+  ,PA_EXPENDITURE_ORG_ID                   NUMBER
+  ,EXPENDITURE_TYPE                        VARCHAR2(30)
+  ,FINAL_COMPLETION_FLAG                   VARCHAR2(1)
+  ,TRANSFER_PERCENTAGE                     NUMBER
+  ,TRANSACTION_SEQUENCE_ID                 NUMBER
+  ,MATERIAL_ACCOUNT                        NUMBER
+  ,MATERIAL_OVERHEAD_ACCOUNT               NUMBER
+  ,RESOURCE_ACCOUNT                        NUMBER
+  ,OUTSIDE_PROCESSING_ACCOUNT              NUMBER
+  ,OVERHEAD_ACCOUNT                        NUMBER
+  ,BOM_REVISION                            VARCHAR2(3)
+  ,ROUTING_REVISION                        VARCHAR2(3)
+  ,BOM_REVISION_DATE                       DATE
+  ,ROUTING_REVISION_DATE                   DATE
+  ,ALTERNATE_BOM_DESIGNATOR                VARCHAR2(10)
+  ,ALTERNATE_ROUTING_DESIGNATOR            VARCHAR2(10)
+  ,ACCOUNTING_CLASS                        VARCHAR2(10)
+  ,DEMAND_CLASS                            VARCHAR2(30)
+  ,PARENT_ID                               NUMBER
+  ,SUBSTITUTION_TYPE_ID                    NUMBER
+  ,SUBSTITUTION_ITEM_ID                    NUMBER
+  ,SCHEDULE_GROUP                          NUMBER
+  ,BUILD_SEQUENCE                          NUMBER
+  ,SCHEDULE_NUMBER                         VARCHAR2(30)
+  ,SCHEDULED_FLAG                          NUMBER
+  ,FLOW_SCHEDULE                           VARCHAR2(1)
+  ,COST_GROUP_ID                           NUMBER
+  ,KANBAN_CARD_ID                          NUMBER
+  ,QA_COLLECTION_ID                        NUMBER
+  ,OVERCOMPLETION_TRANSACTION_QTY          NUMBER
+  ,OVERCOMPLETION_PRIMARY_QTY              NUMBER
+  ,OVERCOMPLETION_TRANSACTION_ID           NUMBER
+  ,END_ITEM_UNIT_NUMBER                    VARCHAR2(60)
+  ,SCHEDULED_PAYBACK_DATE                  DATE
+  ,ORG_COST_GROUP_ID                       NUMBER
+  ,COST_TYPE_ID                            NUMBER
+  ,SOURCE_LOT_NUMBER                       VARCHAR2(80)
+  ,TRANSFER_COST_GROUP_ID                  NUMBER
+  ,LPN_NUMBER                              VARCHAR2(30)
+  ,TRANSFER_LPN_ID                         NUMBER
+  ,CONTENT_LPN_ID                          NUMBER
+  ,XML_DOCUMENT_ID                         VARCHAR2(240)
+  ,ORGANIZATION_TYPE                       NUMBER
+  ,TRANSFER_ORGANIZATION_TYPE              NUMBER
+  ,OWNING_ORGANIZATION_NAME                VARCHAR2(30)
+  ,OWNING_TP_TYPE                          NUMBER
+  ,XFR_OWNING_ORGANIZATION_ID              NUMBER
+  ,TRANSFER_OWNING_TP_TYPE                 NUMBER
+  ,PLANNING_ORGANIZATION_ID                NUMBER
+  ,PLANNING_TP_TYPE                        NUMBER
+  ,XFR_PLANNING_ORGANIZATION_ID            NUMBER
+  ,TRANSFER_PLANNING_TP_TYPE               NUMBER
+  ,SECONDARY_UOM_CODE                      VARCHAR2(240)
+  ,SECONDARY_TRANSACTION_QUANTITY          NUMBER
+  ,TRANSACTION_GROUP_ID                    NUMBER
+  ,TRANSACTION_GROUP_SEQ                   NUMBER
+  ,REPRESENTATIVE_LOT_NUMBER               VARCHAR2(80)
+  ,TRANSACTION_BATCH_ID                    NUMBER
+  ,TRANSACTION_BATCH_SEQ                   NUMBER
+  ,REBUILD_ITEM_ID                         NUMBER
+  ,REBUILD_SERIAL_NUMBER                   VARCHAR2(30)
+  ,REBUILD_ACTIVITY_ID                     NUMBER
+  ,REBUILD_JOB_NAME                        VARCHAR2(240)
+  ,MOVE_TRANSACTION_ID                     NUMBER
+  ,COMPLETION_TRANSACTION_ID               NUMBER
+  ,WIP_SUPPLY_TYPE                         NUMBER
+  ,RELIEVE_RESERVATIONS_FLAG               VARCHAR2(1)
+  ,RELIEVE_HIGH_LEVEL_RSV_FLAG             VARCHAR2(1)
+  ,TRANSFER_PRICE                          NUMBER
+  ,STATUS                                  VARCHAR2(30)
+  ,REQUEST_ID                              NUMBER
+  ,OPERATING_UNIT_NAME                     VARCHAR2(250)
+  ,LOT_NUMBER                              VARCHAR2(30)
+  ,MTLI_ORIGINATION_DATE                   DATE
+  ,LOT_EXPIRATION_DATE                     DATE
+  ,STATUS_ID                               VARCHAR2(30)
+  ,MTLI_TRANSACTIONS_QUANTITY              NUMBER
+  ,MTI_TRANSACTION_UOM                     VARCHAR2(3)
+  ,MTI_OWNING_ORGANIZATION_NAME            VARCHAR2(30)
+  ,FM_SERIAL_NUMBER                        VARCHAR2(30)
+  ,TO_SERIAL_NUMBER                        VARCHAR2(30)
+  ,MSNI_ORIGINATION_DATE                   DATE
+  ,STATUS_NAME                             VARCHAR2(30)
+  ,MTLI_PLACE_OF_ORIGIN                    VARCHAR2(150)
+  ,CREATION_DATE                           DATE 
+  ,CREATED_BY                              NUMBER
+  ,LAST_UPDATE_DATE                        DATE
+  ,LAST_UPDATED_BY                         NUMBER
+  ,BATCH_ID				   VARCHAR2(200)
+  ,RECORD_NUMBER                           NUMBER
+  ,SOURCE_SYSTEM_NAME                      VARCHAR2(150)
+  ,PROCESS_FLAG                            NUMBER
+  ,TRANSACTION_MODE                        NUMBER
+  ,TRANSACTION_TYPE_NAME                   VARCHAR2(40)
+  ,PROCESS_CODE                            VARCHAR2(100)
+  ,MTLI_STATUS_ID			   NUMBER
+  ,LAST_UPDATE_LOGIN                       NUMBER
+  ,SOURCE_CODE                             VARCHAR2(30)
+  ,SOURCE_LINE_ID                          NUMBER
+  ,SOURCE_HEADER_ID                        NUMBER
+  ,LPN_ID                                  NUMBER
+  ,MTI_OWNING_ORGANIZATION_ID              NUMBER
+);
+
+        TYPE G_XX_INV_ITEMQOH_PRE_TAB_TYPE IS TABLE OF G_XX_INV_ITEMQOH_PRE_REC_TYPE
+        INDEX BY BINARY_INTEGER;
+
+
+        PROCEDURE main (
+                errbuf OUT VARCHAR2,
+                retcode OUT VARCHAR2,
+                p_batch_id IN VARCHAR2,
+                p_restart_flag IN VARCHAR2,
+                p_override_flag IN VARCHAR2,
+                p_validate_and_load IN VARCHAR2,
+		p_transaction_type_name IN VARCHAR2,
+		p_transaction_date IN VARCHAR2
+        );
+
+-- Constants defined for version control of all the files of the components
+        CN_XXINTGCNVVL_PKS              CONSTANT VARCHAR2 (6)    := '1.0';
+        CN_XXINTGCNVVL_PKB              CONSTANT VARCHAR2 (6)    := '1.0';
+        CN_XXINTGCNVTL_PKS              CONSTANT VARCHAR2 (6)    := '1.0';
+        CN_XXINTGCNVTL_PKB              CONSTANT VARCHAR2 (6)    := '1.0';
+        CN_XXINTGCNVT2_TBL              CONSTANT VARCHAR2 (6)    := '1.0';
+        CN_XXINTGCNVT2_SYN              CONSTANT VARCHAR2 (6)    := '1.0';
+        CN_XXINTGCNVT1_TBL              CONSTANT VARCHAR2 (6)    := '1.0';
+	CN_XXINTGCNVT1_SYN              CONSTANT VARCHAR2 (6)    := '1.0';
+	
+END xx_inv_itemonhandqty_pkg;
+/
+
+
+GRANT EXECUTE ON APPS.XX_INV_ITEMONHANDQTY_PKG TO INTG_XX_NONHR_RO;

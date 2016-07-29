@@ -1,0 +1,339 @@
+DROP VIEW APPS.XX_BI_OE_DELIVRS_V;
+
+/* Formatted on 6/6/2016 4:59:24 PM (QP5 v5.277) */
+CREATE OR REPLACE FORCE VIEW APPS.XX_BI_OE_DELIVRS_V
+(
+   ACCEPTED_BY,
+   ACCEPTED_DATE,
+   ACKNOWLEDGED_BY,
+   ADDITIONAL_SHIPMENT_INFO,
+   ASN_DATE_SENT,
+   ASN_SEQ_NUMBER,
+   BILL_FREIGHT_TO,
+   BOOKING_NUMBER,
+   CARRIED_BY,
+   COD_CHARGE_PAID_BY,
+   COD_CURRENCY_CODE,
+   COD_REMIT_TO,
+   CONFIRMED_BY,
+   CONFIRM_DATE,
+   CURRENCY_CODE,
+   CUSTOMER_NAME,
+   CUSTOMER_NUMBER,
+   DELIVERY_TYPE,
+   DESCRIPTION,
+   DOCK_CODE,
+   FOB_LOCATION,
+   FREIGHT_TERMS_CODE,
+   INITIAL_PICKUP_DATE,
+   INIT_PICKUP_LOCATION,
+   INTMED_SHIP_TO_DESCRIPTION,
+   LOADING_ORDER_FLAG,
+   LOADING_SEQUENCE,
+   NAME,
+   NUMBER_OF_LPN,
+   ORGANIZATION_CODE,
+   ORGANIZATION_NAME,
+   POOLED_SHIP_TO_DESCRIPTION,
+   PORT_OF_DISCHARGE,
+   PORT_OF_LOADING,
+   PROBLEM_CONTACT_REFERENCE,
+   REASON_OF_TRANSPORT,
+   SERVICE_CONTRACT,
+   ULTIMATE_DROPOFF_DATE,
+   ULTIMATE_DROPOFF_DESCRIPTION,
+   VOLUME_UOM_CODE,
+   WAYBILL,
+   WEIGHT_UOM_CODE,
+   ACCEPTED_DATE_DD,
+   ACCEPTED_DATE_MM,
+   ACCEPTED_DATE_Q,
+   ACCEPTED_DATE_YYYY,
+   ASN_DATE_SENT_DD,
+   ASN_DATE_SENT_MM,
+   ASN_DATE_SENT_Q,
+   ASN_DATE_SENT_YYYY,
+   CONFIRM_DATE_DD,
+   CONFIRM_DATE_MM,
+   CONFIRM_DATE_Q,
+   CONFIRM_DATE_YYYY,
+   INITIAL_PICKUP_DATE_DD,
+   INITIAL_PICKUP_DATE_MM,
+   INITIAL_PICKUP_DATE_Q,
+   INITIAL_PICKUP_DATE_YYYY,
+   ULTIMATE_DROPOFF_DATE_DD,
+   ULTIMATE_DROPOFF_DATE_MM,
+   ULTIMATE_DROPOFF_DATE_Q,
+   ULTIMATE_DROPOFF_DATE_YYYY,
+   STATUS_CODE,
+   PLANNED_FLAG,
+   ACCEPTANCE_FLAG,
+   FOB_CODE,
+   GLOBAL_CONTEXT_VALUE,
+   GLOBAL_VOLUME_TYPE_2,
+   GLOBAL_VOLUME_NUMBER_2,
+   GLOBAL_VOLUME_QUANTITY_2,
+   COD_AMOUNT,
+   NET_WEIGHT,
+   VOLUME,
+   GROSS_WEIGHT
+)
+AS
+   SELECT WND.ACCEPTED_BY ACCEPTED_BY,
+          WND.ACCEPTED_DATE ACCEPTED_DATE,
+          WND.ACKNOWLEDGED_BY ACKNOWLEDGED_BY,
+          WND.ADDITIONAL_SHIPMENT_INFO ADDITIONAL_SHIPMENT_INFO,
+          WND.ASN_DATE_SENT ASN_DATE_SENT,
+          WND.ASN_SEQ_NUMBER ASN_SEQ_NUMBER,
+          WND.BILL_FREIGHT_TO BILL_FREIGHT_TO,
+          WND.BOOKING_NUMBER BOOKING_NUMBER,
+          WND.CARRIED_BY CARRIED_BY,
+          WND.COD_CHARGE_PAID_BY COD_CHARGE_PAID_BY,
+          WND.COD_CURRENCY_CODE COD_CURRENCY_CODE,
+          WND.COD_REMIT_TO COD_REMIT_TO,
+          WND.CONFIRMED_BY CONFIRMED_BY,
+          WND.CONFIRM_DATE CONFIRM_DATE,
+          WND.CURRENCY_CODE CURRENCY_CODE,
+          HZP.PARTY_NAME CUSTOMER_NAME,
+          HZP.PARTY_NUMBER CUSTOMER_NUMBER,
+          WND.DELIVERY_TYPE DELIVERY_TYPE,
+          WND.DESCRIPTION DESCRIPTION,
+          WND.DOCK_CODE DOCK_CODE,
+          LOC5.UI_LOCATION_CODE FOB_LOCATION,
+          WND.FREIGHT_TERMS_CODE FREIGHT_TERMS_CODE,
+          WND.INITIAL_PICKUP_DATE INITIAL_PICKUP_DATE,
+          LOC4.UI_LOCATION_CODE INIT_PICKUP_LOCATION,
+          LOC2.UI_LOCATION_CODE INTMED_SHIP_TO_DESCRIPTION,
+          WND.LOADING_ORDER_FLAG LOADING_ORDER_FLAG,
+          WND.LOADING_SEQUENCE LOADING_SEQUENCE,
+          WND.NAME NAME,
+          WND.NUMBER_OF_LPN NUMBER_OF_LPN,
+          MPA.ORGANIZATION_CODE ORGANIZATION_CODE,
+          ORG.NAME ORGANIZATION_NAME,
+          LOC3.UI_LOCATION_CODE POOLED_SHIP_TO_DESCRIPTION,
+          WND.PORT_OF_DISCHARGE PORT_OF_DISCHARGE,
+          WND.PORT_OF_LOADING PORT_OF_LOADING,
+          WND.PROBLEM_CONTACT_REFERENCE PROBLEM_CONTACT_REFERENCE,
+          WND.REASON_OF_TRANSPORT REASON_OF_TRANSPORT,
+          WND.SERVICE_CONTRACT SERVICE_CONTRACT,
+          WND.ULTIMATE_DROPOFF_DATE ULTIMATE_DROPOFF_DATE,
+          LOC1.UI_LOCATION_CODE ULTIMATE_DROPOFF_DESCRIPTION,
+          WND.VOLUME_UOM_CODE VOLUME_UOM_CODE,
+          WND.WAYBILL WAYBILL,
+          WND.WEIGHT_UOM_CODE WEIGHT_UOM_CODE,
+          (DECODE (
+              WND.ACCEPTED_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (WND.ACCEPTED_DATE, 'DD'), 'DD') || '190001',
+                 'DDYYYYMM')))
+             ACCEPTED_DATE_DD,
+          (DECODE (
+              WND.ACCEPTED_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (WND.ACCEPTED_DATE, 'MM'), 'MM') || '1900',
+                 'MMYYYY')))
+             ACCEPTED_DATE_MM,
+          (DECODE (
+              WND.ACCEPTED_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (WND.ACCEPTED_DATE, 'Q'), 'MM') || '1900',
+                 'MMYYYY')))
+             ACCEPTED_DATE_Q,
+          (DECODE (
+              WND.ACCEPTED_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (WND.ACCEPTED_DATE, 'YYYY'), 'YYYY') || '01',
+                 'YYYYMM')))
+             ACCEPTED_DATE_YYYY,
+          (DECODE (
+              WND.ASN_DATE_SENT,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (WND.ASN_DATE_SENT, 'DD'), 'DD') || '190001',
+                 'DDYYYYMM')))
+             ASN_DATE_SENT_DD,
+          (DECODE (
+              WND.ASN_DATE_SENT,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (WND.ASN_DATE_SENT, 'MM'), 'MM') || '1900',
+                 'MMYYYY')))
+             ASN_DATE_SENT_MM,
+          (DECODE (
+              WND.ASN_DATE_SENT,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (WND.ASN_DATE_SENT, 'Q'), 'MM') || '1900',
+                 'MMYYYY')))
+             ASN_DATE_SENT_Q,
+          (DECODE (
+              WND.ASN_DATE_SENT,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (WND.ASN_DATE_SENT, 'YYYY'), 'YYYY') || '01',
+                 'YYYYMM')))
+             ASN_DATE_SENT_YYYY,
+          (DECODE (
+              WND.CONFIRM_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (WND.CONFIRM_DATE, 'DD'), 'DD') || '190001',
+                 'DDYYYYMM')))
+             CONFIRM_DATE_DD,
+          (DECODE (
+              WND.CONFIRM_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (WND.CONFIRM_DATE, 'MM'), 'MM') || '1900',
+                 'MMYYYY')))
+             CONFIRM_DATE_MM,
+          (DECODE (
+              WND.CONFIRM_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (WND.CONFIRM_DATE, 'Q'), 'MM') || '1900',
+                 'MMYYYY')))
+             CONFIRM_DATE_Q,
+          (DECODE (
+              WND.CONFIRM_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (WND.CONFIRM_DATE, 'YYYY'), 'YYYY') || '01',
+                 'YYYYMM')))
+             CONFIRM_DATE_YYYY,
+          (DECODE (
+              WND.INITIAL_PICKUP_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (WND.INITIAL_PICKUP_DATE, 'DD'), 'DD')
+                 || '190001',
+                 'DDYYYYMM')))
+             INITIAL_PICKUP_DATE_DD,
+          (DECODE (
+              WND.INITIAL_PICKUP_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (WND.INITIAL_PICKUP_DATE, 'MM'), 'MM')
+                 || '1900',
+                 'MMYYYY')))
+             INITIAL_PICKUP_DATE_MM,
+          (DECODE (
+              WND.INITIAL_PICKUP_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (WND.INITIAL_PICKUP_DATE, 'Q'), 'MM')
+                 || '1900',
+                 'MMYYYY')))
+             INITIAL_PICKUP_DATE_Q,
+          (DECODE (
+              WND.INITIAL_PICKUP_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (WND.INITIAL_PICKUP_DATE, 'YYYY'), 'YYYY')
+                 || '01',
+                 'YYYYMM')))
+             INITIAL_PICKUP_DATE_YYYY,
+          (DECODE (
+              WND.ULTIMATE_DROPOFF_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (WND.ULTIMATE_DROPOFF_DATE, 'DD'), 'DD')
+                 || '190001',
+                 'DDYYYYMM')))
+             ULTIMATE_DROPOFF_DATE_DD,
+          (DECODE (
+              WND.ULTIMATE_DROPOFF_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (WND.ULTIMATE_DROPOFF_DATE, 'MM'), 'MM')
+                 || '1900',
+                 'MMYYYY')))
+             ULTIMATE_DROPOFF_DATE_MM,
+          (DECODE (
+              WND.ULTIMATE_DROPOFF_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (WND.ULTIMATE_DROPOFF_DATE, 'Q'), 'MM')
+                 || '1900',
+                 'MMYYYY')))
+             ULTIMATE_DROPOFF_DATE_Q,
+          (DECODE (
+              WND.ULTIMATE_DROPOFF_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (WND.ULTIMATE_DROPOFF_DATE, 'YYYY'),
+                             'YYYY')
+                 || '01',
+                 'YYYYMM')))
+             ULTIMATE_DROPOFF_DATE_YYYY,
+          DECODE (STATUS_CODE,
+                  'CL', 'Closed',
+                  'CO', 'Confirmed',
+                  'IT', 'In-Transit',
+                  'OP', 'Open',
+                  'PA', 'Packed',
+                  'SA', 'Shipment Advice Received',
+                  'SC', 'Shipment Cancellation Request',
+                  'SR', 'Shipment Requested',
+                  NULL)
+             STATUS_CODE,
+          DECODE (PLANNED_FLAG,  'N', 'No',  'Y', 'Yes',  NULL) PLANNED_FLAG,
+          DECODE (ACCEPTANCE_FLAG,  'N', 'No',  'Y', 'Yes',  NULL)
+             ACCEPTANCE_FLAG,
+          DECODE (FOB_CODE,
+                  'BUY', 'Buyer',
+                  'CUSTOMER SITE', 'Customer Site',
+                  'FACTORY', 'Factory',
+                  'LOAD', 'Loading Dock',
+                  'SEL', 'Seller',
+                  'SHIP POINT', 'Shipping Point',
+                  NULL)
+             FOB_CODE,
+          WND.GLOBAL_ATTRIBUTE_CATEGORY GLOBAL_CONTEXT_VALUE,
+          WND.GLOBAL_ATTRIBUTE1 GLOBAL_VOLUME_TYPE_2,
+          WND.GLOBAL_ATTRIBUTE2 GLOBAL_VOLUME_NUMBER_2,
+          WND.GLOBAL_ATTRIBUTE3 GLOBAL_VOLUME_QUANTITY_2,
+          WND.COD_AMOUNT COD_AMOUNT,
+          WND.NET_WEIGHT NET_WEIGHT,
+          WND.VOLUME VOLUME,
+          WND.GROSS_WEIGHT GROSS_WEIGHT
+     FROM WSH_NEW_DELIVERIES WND,
+          HR_ALL_ORGANIZATION_UNITS ORG,
+          WSH_LOCATIONS LOC1,
+          WSH_LOCATIONS LOC2,
+          WSH_LOCATIONS LOC3,
+          WSH_LOCATIONS LOC4,
+          WSH_LOCATIONS LOC5,
+          HZ_PARTIES HZP,
+          MTL_PARAMETERS MPA
+    WHERE     WND.ORGANIZATION_ID = ORG.ORGANIZATION_ID(+)
+          AND WND.CUSTOMER_ID = HZP.PARTY_ID(+)
+          AND WND.ULTIMATE_DROPOFF_LOCATION_ID = LOC1.WSH_LOCATION_ID
+          AND WND.INTMED_SHIP_TO_LOCATION_ID = LOC2.WSH_LOCATION_ID(+)
+          AND WND.POOLED_SHIP_TO_LOCATION_ID = LOC3.WSH_LOCATION_ID(+)
+          AND WND.INITIAL_PICKUP_LOCATION_ID = LOC4.WSH_LOCATION_ID
+          AND WND.FOB_LOCATION_ID = LOC5.WSH_LOCATION_ID(+)
+          AND WND.ORGANIZATION_ID = MPA.ORGANIZATION_ID(+);
+
+
+CREATE OR REPLACE SYNONYM ETLEBSUSER.XX_BI_OE_DELIVRS_V FOR APPS.XX_BI_OE_DELIVRS_V;
+
+
+CREATE OR REPLACE SYNONYM XXAPPSREAD.XX_BI_OE_DELIVRS_V FOR APPS.XX_BI_OE_DELIVRS_V;
+
+
+CREATE OR REPLACE SYNONYM XXBI.XX_BI_OE_DELIVRS_V FOR APPS.XX_BI_OE_DELIVRS_V;
+
+
+CREATE OR REPLACE SYNONYM XXINTG.XX_BI_OE_DELIVRS_V FOR APPS.XX_BI_OE_DELIVRS_V;
+
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_OE_DELIVRS_V TO ETLEBSUSER;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_OE_DELIVRS_V TO XXAPPSREAD;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_OE_DELIVRS_V TO XXINTG;

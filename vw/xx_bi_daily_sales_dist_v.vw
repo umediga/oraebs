@@ -1,0 +1,52 @@
+DROP VIEW APPS.XX_BI_DAILY_SALES_DIST_V;
+
+/* Formatted on 6/6/2016 4:59:57 PM (QP5 v5.277) */
+CREATE OR REPLACE FORCE VIEW APPS.XX_BI_DAILY_SALES_DIST_V
+(
+   OPERATING_UNIT_ID,
+   OPERATING_UNIT_NAME,
+   BOOKED_DATE,
+   DISTRIBUTOR_NUMBER,
+   DISTRIBUTOR_NAME,
+   ORDERED_AMOUNT
+)
+AS
+     SELECT hou.ORGANIZATION_ID,
+            hou.name,
+            TRUNC (ooh.ordered_date),
+            hca.account_number,
+            hp.party_name,
+            SUM (OE_TOTALS_GRP.GET_ORDER_TOTAL (ooh.header_id, NULL, 'ALL'))
+       FROM oe_order_headers_all ooh,
+            hz_cust_accounts_all hca,
+            hz_parties hp,
+            hr_operating_units hou
+      WHERE     ooh.org_id = hou.organization_id
+            AND ooh.sold_to_org_id = hca.cust_account_id
+            AND hca.party_id = hp.party_id
+            AND hca.customer_class_code = 'DISTRIBUTOR'
+            AND ooh.flow_status_code = 'BOOKED'
+   GROUP BY hou.ORGANIZATION_ID,
+            hou.name,
+            TRUNC (ooh.ordered_date),
+            hca.account_number,
+            hp.party_name;
+
+
+CREATE OR REPLACE SYNONYM ETLEBSUSER.XX_BI_DAILY_SALES_DIST_V FOR APPS.XX_BI_DAILY_SALES_DIST_V;
+
+
+CREATE OR REPLACE SYNONYM XXAPPSREAD.XX_BI_DAILY_SALES_DIST_V FOR APPS.XX_BI_DAILY_SALES_DIST_V;
+
+
+CREATE OR REPLACE SYNONYM XXBI.XX_BI_DAILY_SALES_DIST_V FOR APPS.XX_BI_DAILY_SALES_DIST_V;
+
+
+CREATE OR REPLACE SYNONYM XXINTG.XX_BI_DAILY_SALES_DIST_V FOR APPS.XX_BI_DAILY_SALES_DIST_V;
+
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_DAILY_SALES_DIST_V TO ETLEBSUSER;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_DAILY_SALES_DIST_V TO XXAPPSREAD;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_DAILY_SALES_DIST_V TO XXINTG;

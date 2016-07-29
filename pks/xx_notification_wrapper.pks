@@ -1,0 +1,12 @@
+DROP PACKAGE APPS.XX_NOTIFICATION_WRAPPER;
+
+CREATE OR REPLACE PACKAGE APPS."XX_NOTIFICATION_WRAPPER" 
+IS
+   FUNCTION notify_user (p_subscription_guid   IN            RAW,
+                         p_event               IN OUT NOCOPY WF_EVENT_T)
+      RETURN VARCHAR2;
+END xx_notification_wrapper;
+/
+
+
+GRANT EXECUTE ON APPS.XX_NOTIFICATION_WRAPPER TO INTG_XX_NONHR_RO;

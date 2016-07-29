@@ -1,0 +1,168 @@
+DROP VIEW APPS.XX_BI_FI_CAT_TY_V;
+
+/* Formatted on 6/6/2016 4:59:54 PM (QP5 v5.277) */
+CREATE OR REPLACE FORCE VIEW APPS.XX_BI_FI_CAT_TY_V
+(
+   CATEGORY_FLEX_STRUCTURE,
+   CATEGORY_SET_ID,
+   CATEGORY_TYPE_NAME,
+   CREATED_BY,
+   CREATED_DATE,
+   DEFAULT_CATEGORY_ID,
+   DESCRIPTION,
+   LAST_UPDATED_BY,
+   LAST_UPDATED_DATE,
+   STRUCTURE_ID,
+   CREATED_DATE_DAY,
+   CREATED_DATE_MONTH,
+   CREATED_DATE_QUARTER,
+   CREATED_DATE_YEAR,
+   LAST_UPDATED_DATE_DAY,
+   LAST_UPDATED_DATE_MONTH,
+   LAST_UPDATED_DATE_QUARTER,
+   LAST_UPDATED_DATE_YEAR,
+   DEFAULT_CATEGORY_NAME,
+   ITEM_CATEGORY_201,
+   INTEREST_TYPE_50136,
+   PRIMARY_CODE_50136,
+   SECONDARY_CODE_50136,
+   DUMMY_50152,
+   CARTON_GROUP_50153,
+   CLASS_50168,
+   SUBCLASS_50168,
+   CONTRACT_CATEGORY_50169,
+   CLASSIFICATION_50190,
+   COMMODITY_50190,
+   COUNTRY_50190,
+   PRODUCT_50208,
+   ENFORCE_CATEGORIES_FLAG,
+   CONTROL_LEVEL
+)
+AS
+   SELECT ID.ID_FLEX_STRUCTURE_NAME,
+          CASET.CATEGORY_SET_ID,
+          CASET.CATEGORY_SET_NAME,
+          CASET.CREATED_BY,
+          CASET.CREATION_DATE,
+          CASET.DEFAULT_CATEGORY_ID,
+          CASET.DESCRIPTION,
+          CASET.LAST_UPDATED_BY,
+          CASET.LAST_UPDATE_DATE,
+          CASET.STRUCTURE_ID,
+          (DECODE (
+              CASET.CREATION_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (CASET.CREATION_DATE, 'DD'), 'DD')
+                 || '190001',
+                 'DDYYYYMM')))
+             CREATED_DATE_DAY,
+          (DECODE (
+              CASET.CREATION_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (CASET.CREATION_DATE, 'MM'), 'MM') || '1900',
+                 'MMYYYY')))
+             CREATED_DATE_MONTH,
+          (DECODE (
+              CASET.CREATION_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                 TO_CHAR (TRUNC (CASET.CREATION_DATE, 'Q'), 'MM') || '1900',
+                 'MMYYYY')))
+             CREATED_DATE_QUARTER,
+          (DECODE (
+              CASET.CREATION_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (CASET.CREATION_DATE, 'YYYY'), 'YYYY')
+                 || '01',
+                 'YYYYMM')))
+             CREATED_DATE_YEAR,
+          (DECODE (
+              CASET.LAST_UPDATE_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (CASET.LAST_UPDATE_DATE, 'DD'), 'DD')
+                 || '190001',
+                 'DDYYYYMM')))
+             LAST_UPDATED_DATE_DAY,
+          (DECODE (
+              CASET.LAST_UPDATE_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (CASET.LAST_UPDATE_DATE, 'MM'), 'MM')
+                 || '1900',
+                 'MMYYYY')))
+             LAST_UPDATED_DATE_MONTH,
+          (DECODE (
+              CASET.LAST_UPDATE_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (CASET.LAST_UPDATE_DATE, 'Q'), 'MM')
+                 || '1900',
+                 'MMYYYY')))
+             LAST_UPDATED_DATE_QUARTER,
+          (DECODE (
+              CASET.LAST_UPDATE_DATE,
+              NULL, TO_DATE (NULL, 'MMDDYYYY'),
+              TO_DATE (
+                    TO_CHAR (TRUNC (CASET.LAST_UPDATE_DATE, 'YYYY'), 'YYYY')
+                 || '01',
+                 'YYYYMM')))
+             LAST_UPDATED_DATE_YEAR,
+          DECODE (
+             CA.STRUCTURE_ID,
+             201, CA.SEGMENT1,
+             50136, CA.SEGMENT1 || '.' || CA.SEGMENT2 || '.' || CA.SEGMENT3,
+             50152, CA.SEGMENT1,
+             50153, CA.SEGMENT1,
+             50168, CA.SEGMENT1 || '.' || CA.SEGMENT2,
+             50169, CA.SEGMENT1,
+             50190, CA.SEGMENT1 || '.' || CA.SEGMENT2 || '.' || CA.SEGMENT3,
+             50208, CA.SEGMENT1,
+             NULL),
+          CA.SEGMENT1 item_category_201,
+          CA.SEGMENT1 interest_type_50136,
+          CA.SEGMENT2 primary_code_50136,
+          CA.SEGMENT3 secondary_code_50136,
+          CA.SEGMENT1 dummy_50152,
+          CA.SEGMENT1 carton_group_50153,
+          CA.SEGMENT1 class_50168,
+          CA.SEGMENT2 subclass_50168,
+          CA.SEGMENT1 contract_category_50169,
+          CA.SEGMENT1 classification_50190,
+          CA.SEGMENT2 commodity_50190,
+          CA.SEGMENT3 country_50190,
+          CA.SEGMENT1 product_50208,
+          DECODE (CASET.VALIDATE_FLAG,  'N', 'No',  'Y', 'Yes',  NULL),
+          DECODE (CASET.CONTROL_LEVEL,
+                  '1', 'Master Level',
+                  '2', 'Org Level',
+                  NULL)
+     FROM FND_ID_FLEX_STRUCTURES_VL ID,
+          MTL_CATEGORIES CA,
+          MTL_CATEGORY_SETS CASET
+    WHERE     CASET.DEFAULT_CATEGORY_ID = CA.CATEGORY_ID(+)
+          AND CASET.STRUCTURE_ID = ID.ID_FLEX_NUM
+          AND ID.APPLICATION_ID = 401
+          AND ID.ID_FLEX_CODE = 'MCAT';
+
+
+CREATE OR REPLACE SYNONYM ETLEBSUSER.XX_BI_FI_CAT_TY_V FOR APPS.XX_BI_FI_CAT_TY_V;
+
+
+CREATE OR REPLACE SYNONYM XXAPPSREAD.XX_BI_FI_CAT_TY_V FOR APPS.XX_BI_FI_CAT_TY_V;
+
+
+CREATE OR REPLACE SYNONYM XXBI.XX_BI_FI_CAT_TY_V FOR APPS.XX_BI_FI_CAT_TY_V;
+
+
+CREATE OR REPLACE SYNONYM XXINTG.XX_BI_FI_CAT_TY_V FOR APPS.XX_BI_FI_CAT_TY_V;
+
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_FI_CAT_TY_V TO ETLEBSUSER;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_FI_CAT_TY_V TO XXAPPSREAD;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_FI_CAT_TY_V TO XXINTG;

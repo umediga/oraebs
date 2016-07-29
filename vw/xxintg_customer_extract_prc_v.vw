@@ -1,0 +1,157 @@
+DROP VIEW APPS.XXINTG_CUSTOMER_EXTRACT_PRC_V;
+
+/* Formatted on 6/6/2016 5:00:23 PM (QP5 v5.277) */
+CREATE OR REPLACE FORCE VIEW APPS.XXINTG_CUSTOMER_EXTRACT_PRC_V
+(
+   CUSTOMER_SITE_NUMBER,
+   CUSTOMER_NAME,
+   ADDRESS1,
+   ADDRESS2,
+   ADDRESS3,
+   ADDRESS4,
+   CITY,
+   STATE,
+   ZIP,
+   COUNTRY_CODE,
+   COUNTY,
+   PHONE,
+   FAX,
+   CONTACT,
+   PHONES800,
+   OVERSEAS_PHONE,
+   TERMS_CODE,
+   US_REPT,
+   TYPEID,
+   CLASS_CODE,
+   TERRITORYID3,
+   REGION_ID,
+   SALES_REP_ID,
+   SALES_DIVISION_ID,
+   TERRITORYID2,
+   BUYING_GROUP,
+   GEOZONE,
+   TERRITORYID1,
+   ORTHOTERRITORY,
+   GPO,
+   HIN,
+   TERRITORYID4,
+   CREATION_DATE,
+   ACTIVE_FLAG,
+   ORG_ID,
+   LAST_UPDATE_DATE
+)
+AS
+     SELECT hca.account_number || '-' || hps.party_site_number
+               Customer_Site_Number,
+            hp.party_name Customer_Name,
+            loc.address1,
+            loc.address2,
+            loc.address3,
+            loc.address4,
+            loc.city,
+            loc.state,
+            loc.postal_code zip,
+            loc.country Country_Code,
+            loc.county county,
+            NULL phone,
+            NULL fax,
+            NULL contact,
+            NULL phones800,
+            NULL overseas_phone,
+            rt.name Terms_Code,
+            hcas.attribute3 US_Rept,
+            hca.customer_class_code TypeID,
+            --hp.category_code TypeID,
+            NULL class_Code,
+            SUBSTR (hcas.attribute7, 1, 5) TerritoryID3,
+            NULL region_ID,
+            NULL sales_rep_ID,
+            NULL Sales_Division_ID,
+            hcas.attribute6 TerritoryID2,
+            NULL Buying_Group,
+            --hca.customer_class_code Buying_Group,
+            hcas.attribute4 GeoZone,
+            SUBSTR (hcas.attribute5, 1, 5) TerritoryID1,
+            NULL OrthoTerritory,
+            --hcas.attribute10 OrthoTerritory,
+            hcas.attribute1 GPO,
+            hcas.attribute2 HIN,
+            hcas.attribute8 TerritoryID4,
+            TRUNC (hps.creation_date) creation_date,
+            DECODE (hca.status, 'A', 'Y', 'N') active_flag,
+            hcas.org_id,
+            --hps.party_site_creation_date,
+            GREATEST (hps.last_update_date,
+                      hca.last_update_date,
+                      hp.last_update_date,
+                      HCAS.last_update_date,
+                      HCP.last_update_date)
+               last_update_date
+       FROM hz_cust_accounts hca,
+            hz_party_sites hps,
+            hz_parties hp,
+            hz_locations loc,
+            ra_terms rt,
+            HZ_CUST_ACCT_SITES_ALL HCAS,
+            HZ_CUSTOMER_PROFILES HCP
+      WHERE     1 = 1
+            --and HCA.PARTY_ID = HPS.PARTY_ID
+            AND hca.party_id = hp.party_id
+            AND hps.location_id = loc.location_id
+            AND hcas.cust_account_id = hca.cust_account_id
+            AND hcas.party_site_id = hps.party_site_id
+            AND hca.cust_account_id = hcp.cust_account_id
+            AND hcp.standard_terms = rt.term_id(+)
+   GROUP BY hca.account_number || '-' || hps.party_site_number,
+            hp.party_name,
+            loc.address1,
+            loc.address2,
+            loc.address3,
+            loc.address4,
+            loc.city,
+            loc.state,
+            loc.postal_code,
+            loc.country,
+            loc.county,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            rt.name,
+            hcas.attribute3,
+            hca.customer_class_code,
+            --hp.category_code,
+            NULL,
+            SUBSTR (hcas.attribute7, 1, 5),
+            NULL,
+            NULL,
+            NULL,
+            hcas.attribute6,
+            NULL,
+            --hca.customer_class_code,
+            hcas.attribute4,
+            SUBSTR (hcas.attribute5, 1, 5),
+            NULL,
+            --hcas.attribute10,
+            hcas.attribute1,
+            hcas.attribute2,
+            hcas.attribute8,
+            TRUNC (hps.creation_date),
+            DECODE (hca.status, 'A', 'Y', 'N'),
+            hcas.org_id,
+            --hps.creation_date,
+            hps.last_update_date,
+            hca.last_update_date,
+            hp.last_update_date,
+            HCAS.last_update_date,
+            HCP.last_update_date;
+
+
+CREATE OR REPLACE SYNONYM ETLEBSUSER.XXINTG_CUSTOMER_EXTRACT_PRC_V FOR APPS.XXINTG_CUSTOMER_EXTRACT_PRC_V;
+
+
+CREATE OR REPLACE SYNONYM XXBI.XXINTG_CUSTOMER_EXTRACT_PRC_V FOR APPS.XXINTG_CUSTOMER_EXTRACT_PRC_V;
+
+
+GRANT SELECT ON APPS.XXINTG_CUSTOMER_EXTRACT_PRC_V TO ETLEBSUSER;

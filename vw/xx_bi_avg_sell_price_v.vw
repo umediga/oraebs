@@ -1,0 +1,124 @@
+DROP VIEW APPS.XX_BI_AVG_SELL_PRICE_V;
+
+/* Formatted on 6/6/2016 4:59:59 PM (QP5 v5.277) */
+CREATE OR REPLACE FORCE VIEW APPS.XX_BI_AVG_SELL_PRICE_V
+(
+   OPERATING_UNIT,
+   ORDER_NUMBER,
+   ORDER_TYPE,
+   SURGEON_TYPE,
+   ITEM_NUMBER,
+   ORDERED_QUANTITY,
+   UNIT_SELLING_PRICE,
+   REGION,
+   SET_NUMBER,
+   CUSTOMER_CLASSIFICATION,
+   CUSTOMER_ACCOUNT_NUMBER,
+   CUSTOMER_NAME,
+   SHIPMENT_PRIORITY_CODE,
+   DIVISION,
+   ORDER_QUANTITY_UOM,
+   ITEM_TYPE_CODE,
+   LINE_CATEGORY_CODE,
+   SCHEDULE_STATUS_CODE,
+   FLOW_STATUS_CODE,
+   PARTY_TYPE,
+   LOCATION_ID,
+   OPERATING_UNIT_ID,
+   ORGANIZATION_NAME,
+   SOURCE_LANG
+)
+AS
+   SELECT HOU.NAME "Operating_Unit",
+          OOH.ORDER_NUMBER,
+          OTTT.NAME "Order_Type",
+          (SELECT ATTRIBUTE11
+             FROM apps.oe_order_headers_all ooh1
+            WHERE     UPPER (CONTEXT) = UPPER ('Consignment')
+                  AND ooh1.header_id = OOH.header_id)
+             "Surgeon Type",
+          OOL.ORDERED_ITEM "Item number",
+          OOL.ORDERED_QUANTITY,
+          OOL.UNIT_SELLING_PRICE,
+          L.TERRITORY_SHORT_NAME "Region",
+          (SELECT ATTRIBUTE1
+             FROM apps.oe_order_lines_all ool1
+            WHERE     UPPER (CONTEXT) = UPPER ('Consignment')
+                  AND ool1.header_id = OOH.header_id
+                  AND ool1.line_id = ool.line_id)
+             "SET_NUMBER",
+          HCA.CUSTOMER_CLASS_CODE "Customer Classification",
+          HCA.ACCOUNT_NUMBER "Customer Number",
+          HP.PARTY_NAME "CUSTOMER_NAME",
+          OOH.SHIPMENT_PRIORITY_CODE,
+          (SELECT mcb.segment4
+             FROM mtl_item_categories mic,
+                  mtl_category_sets_tl mcst,
+                  mtl_category_sets_b mcsb,
+                  mtl_categories_b mcb
+            WHERE     mcst.category_set_id = mcsb.category_set_id
+                  AND mcst.language = USERENV ('LANG')
+                  AND mic.category_set_id = mcsb.category_set_id
+                  AND mic.category_id = mcb.category_id
+                  AND mcst.category_set_name = 'Sales and Marketing'
+                  AND mic.inventory_item_id = msib.inventory_item_id
+                  AND mic.organization_id = msib.organization_id)
+             DIVISION,
+          OOL.ORDER_QUANTITY_UOM,
+          OOL.ITEM_TYPE_CODE,
+          OOL.LINE_CATEGORY_CODE,
+          OOL.SCHEDULE_STATUS_CODE,
+          OOL.FLOW_STATUS_CODE,
+          HP.PARTY_TYPE,
+          HL.LOCATION_ID,
+          OOD.OPERATING_UNIT,
+          OOD.ORGANIZATION_NAME,
+          OTTT.SOURCE_LANG
+     FROM APPS.OE_ORDER_HEADERS_ALL OOH,
+          APPS.OE_ORDER_LINES_ALL OOL,
+          APPS.HZ_PARTIES HP,
+          APPS.HZ_PARTY_SITES HPS,
+          APPS.HZ_CUST_ACCT_SITES_ALL HCAS,
+          APPS.HZ_CUST_SITE_USES_ALL HCSU,
+          APPS.HZ_CUST_ACCOUNTS_ALL HCA,
+          APPS.HZ_LOCATIONS HL,
+          APPS.FND_TERRITORIES_VL L,
+          APPS.ORG_ORGANIZATION_DEFINITIONS OOD,
+          APPS.HR_OPERATING_UNITS HOU,
+          APPS.OE_TRANSACTION_TYPES_TL OTTT,
+          APPS.MTL_SYSTEM_ITEMS_B MSIB
+    WHERE     OOH.HEADER_ID = OOL.HEADER_ID
+          AND OOH.ORG_ID = OOL.ORG_ID
+          AND HP.PARTY_ID = HPS.PARTY_ID
+          AND HPS.PARTY_SITE_ID = HCAS.PARTY_SITE_ID
+          AND HCAS.CUST_ACCT_SITE_ID = HCSU.CUST_ACCT_SITE_ID
+          AND HCSU.SITE_USE_ID = OOH.INVOICE_TO_ORG_ID
+          AND HP.PARTY_ID = HCA.PARTY_ID
+          AND HCA.CUST_ACCOUNT_ID = HCAS.CUST_ACCOUNT_ID
+          AND OOD.ORGANIZATION_ID = OOH.SHIP_FROM_ORG_ID
+          AND HOU.ORGANIZATION_ID = OOD.OPERATING_UNIT
+          AND L.TERRITORY_CODE = HL.COUNTRY
+          AND HPS.LOCATION_ID = HL.LOCATION_ID
+          AND OTTT.TRANSACTION_TYPE_ID = OOH.ORDER_TYPE_ID
+          AND OOL.INVENTORY_ITEM_ID = MSIB.INVENTORY_ITEM_ID
+          AND OOL.SHIP_FROM_ORG_ID = MSIB.ORGANIZATION_ID
+          AND OTTT.LANGUAGE = USERENV ('LANG');
+
+
+CREATE OR REPLACE SYNONYM ETLEBSUSER.XX_BI_AVG_SELL_PRICE_V FOR APPS.XX_BI_AVG_SELL_PRICE_V;
+
+
+CREATE OR REPLACE SYNONYM XXAPPSREAD.XX_BI_AVG_SELL_PRICE_V FOR APPS.XX_BI_AVG_SELL_PRICE_V;
+
+
+CREATE OR REPLACE SYNONYM XXBI.XX_BI_AVG_SELL_PRICE_V FOR APPS.XX_BI_AVG_SELL_PRICE_V;
+
+
+CREATE OR REPLACE SYNONYM XXINTG.XX_BI_AVG_SELL_PRICE_V FOR APPS.XX_BI_AVG_SELL_PRICE_V;
+
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_AVG_SELL_PRICE_V TO ETLEBSUSER;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_AVG_SELL_PRICE_V TO XXAPPSREAD;
+
+GRANT DELETE, INSERT, REFERENCES, SELECT, UPDATE, ON COMMIT REFRESH, QUERY REWRITE, DEBUG, FLASHBACK, MERGE VIEW ON APPS.XX_BI_AVG_SELL_PRICE_V TO XXINTG;

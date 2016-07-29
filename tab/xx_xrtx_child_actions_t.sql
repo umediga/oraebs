@@ -1,0 +1,39 @@
+DROP TABLE APPS.XX_XRTX_CHILD_ACTIONS_T CASCADE CONSTRAINTS;
+
+CREATE TABLE APPS.XX_XRTX_CHILD_ACTIONS_T
+(
+  ALERT_ID                       NUMBER         NOT NULL,
+  ACTION_NAME                    VARCHAR2(80 BYTE) NOT NULL,
+  DESCRIPTION                    VARCHAR2(240 BYTE),
+  ACTION_LEVEL                   VARCHAR2(80 BYTE),
+  ACTION_TYPE                    VARCHAR2(80 BYTE),
+  LIST_ID                        NUMBER,
+  TO_RECIPIENTS                  VARCHAR2(240 BYTE),
+  CC_RECIPIENTS                  VARCHAR2(240 BYTE),
+  BCC_RECIPIENTS                 VARCHAR2(240 BYTE),
+  PRINT_RECIPIENTS               VARCHAR2(240 BYTE),
+  PRINTER                        VARCHAR2(30 BYTE),
+  SUBJECT                        VARCHAR2(240 BYTE),
+  REPLY_TO                       VARCHAR2(240 BYTE),
+  COLUMN_WRAP_FLAG               VARCHAR2(1 BYTE),
+  MAXIMUM_SUMMARY_MESSAGE_WIDTH  NUMBER,
+  BODY                           VARCHAR2(2000 BYTE)
+)
+TABLESPACE APPS_TS_TX_DATA
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          128K
+            NEXT             128K
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+MONITORING;
