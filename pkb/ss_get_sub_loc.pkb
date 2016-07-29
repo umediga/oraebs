@@ -1,0 +1,185 @@
+DROP PACKAGE BODY APPS.SS_GET_SUB_LOC;
+
+CREATE OR REPLACE PACKAGE BODY APPS.SS_GET_SUB_LOC
+AS
+  /*******************************************************************************************
+  *******************************************************************************************
+  PROJECT       :        Sea Spine
+  PACKAGE NAME  :        SS_GET_SUB_LOC
+  PURPOSE       :
+  REVISIONS     :
+  Ver        Date        Author            Company            Description
+  ---------  ----------  ---------------   ----------
+  ---------  ----------  ---------------
+  1.0       14/12/14     Kannan Mariappan   Gaea Technologies   1. Created the Package
+  ***********************************************************************************************
+  **********************************************************************************************/
+FUNCTION GET_SUB(
+    P_INVENTORY_ITEM_ID     IN NUMBER,
+    P_ORGANIZATION_ID       IN NUMBER,
+    P_LOCATOR_ID            IN NUMBER,
+    p_transaction_source_id IN NUMBER,
+    p_source_line_id        IN NUMBER)
+  RETURN VARCHAR2
+IS
+  L_SUB VARCHAR2(100);
+BEGIN
+  SELECT MMT_TEMP.SUBINVENTORY_CODE
+  INTO L_SUB
+  FROM MTL_MATERIAL_TRANSACTIONS MMT_TEMP,
+    MTL_ITEM_LOCATIONS_KFV MIL_TEMP
+  WHERE MMT_TEMP.transaction_action_id    IN (28,3)
+  AND MMT_TEMP.transaction_source_type_id IN (2,7)
+  AND MMT_TEMP.TRANSACTION_TYPE_ID        IN (52)
+  AND MMT_TEMP.INVENTORY_ITEM_ID           =P_INVENTORY_ITEM_ID
+  AND MMT_TEMP.ORGANIZATION_ID             =P_ORGANIZATION_ID
+  AND MMT_TEMP.LOCATOR_ID                 <>P_LOCATOR_ID
+  AND MMT_TEMP.transaction_source_id       =p_transaction_source_id
+  AND MIL_TEMP.inventory_location_id       =MMT_TEMP.LOCATOR_ID
+  AND MIL_TEMP.ORGANIZATION_ID             =MIL_TEMP.ORGANIZATION_ID
+  AND MMT_TEMP.TRX_SOURCE_LINE_ID          =p_source_line_id
+  AND ROWNUM                               =1;
+  RETURN L_SUB;
+EXCEPTION
+WHEN OTHERS THEN
+  RETURN '';
+END;
+FUNCTION GET_LOC(
+    P_INVENTORY_ITEM_ID     IN NUMBER,
+    P_ORGANIZATION_ID       IN NUMBER,
+    P_LOCATOR_ID            IN NUMBER,
+    p_transaction_source_id IN NUMBER,
+    p_source_line_id        IN NUMBER)
+  RETURN VARCHAR2
+IS
+  L_LOC VARCHAR2(100);
+BEGIN
+  SELECT MIL_TEMP.CONCATENATED_SEGMENTS
+  INTO L_LOC
+  FROM MTL_MATERIAL_TRANSACTIONS MMT_TEMP,
+    MTL_ITEM_LOCATIONS_KFV MIL_TEMP
+  WHERE MMT_TEMP.transaction_action_id    IN (28,3)
+  AND MMT_TEMP.transaction_source_type_id IN (2,7)
+  AND MMT_TEMP.TRANSACTION_TYPE_ID        IN (52)
+  AND MMT_TEMP.INVENTORY_ITEM_ID           =P_INVENTORY_ITEM_ID
+  AND MMT_TEMP.ORGANIZATION_ID             =P_ORGANIZATION_ID
+  AND MMT_TEMP.LOCATOR_ID                 <>P_LOCATOR_ID
+  AND MMT_TEMP.transaction_source_id       =p_transaction_source_id
+  AND MIL_TEMP.inventory_location_id       =MMT_TEMP.LOCATOR_ID
+  AND MIL_TEMP.ORGANIZATION_ID             =MIL_TEMP.ORGANIZATION_ID
+  AND MMT_TEMP.TRX_SOURCE_LINE_ID          =p_source_line_id
+  AND ROWNUM                               =1;
+  RETURN L_LOC;
+EXCEPTION
+WHEN OTHERS THEN
+  RETURN '';
+END;
+FUNCTION GET_SUB_DESC(
+    P_SUB_INV         IN VARCHAR2,
+    P_ORGANIZATION_ID IN NUMBER)
+  RETURN VARCHAR2
+IS
+  L_SUB_DESC VARCHAR2(100);
+BEGIN
+  SELECT MSV.DESCRIPTION
+  INTO L_SUB_DESC
+  FROM MTL_SECONDARY_INVENTORIES MSV,
+    MTL_ITEM_LOCATIONS_KFV MIL_TEMP
+  WHERE MSV.SECONDARY_INVENTORY_NAME= P_SUB_INV
+  AND ROWNUM                        =1;
+  RETURN L_SUB_DESC;
+EXCEPTION
+WHEN OTHERS THEN
+  RETURN '';
+END;
+FUNCTION GET_SERIAL_NUM(
+    P_LOT_CODE        IN NUMBER,
+    P_TRANSACTION_ID  IN NUMBER,
+    P_ORGANIZATION_ID IN NUMBER,
+    P_SERIAL_TRAN_ID  IN NUMBER)
+  RETURN VARCHAR2
+IS
+  L_SERIAL_NUM VARCHAR2(100);
+BEGIN
+  SELECT SERIAL_NUMBER
+  INTO L_SERIAL_NUM
+  FROM
+    (SELECT MTSV.SERIAL_NUMBER
+    FROM MTL_UNIT_TRANSACTIONS_ALL_V MTSV
+    WHERE MTSV.ORGANIZATION_ID =P_ORGANIZATION_ID
+    AND MTSV.TRANSACTION_ID    = P_TRANSACTION_ID
+    AND P_LOT_CODE             =1
+    AND ROWNUM                 =1
+    UNION
+    SELECT MTSV.SERIAL_NUMBER
+    FROM MTL_UNIT_TRANSACTIONS_ALL_V MTSV
+    WHERE MTSV.ORGANIZATION_ID =P_ORGANIZATION_ID
+    AND MTSV.TRANSACTION_ID    = P_SERIAL_TRAN_ID
+    AND P_LOT_CODE             =2
+    AND ROWNUM                 =1
+    ) ;
+  RETURN L_SERIAL_NUM;
+EXCEPTION
+WHEN OTHERS THEN
+  RETURN '';
+END;
+FUNCTION GET_SURGEON_KPI(
+    P_ATTRIBUTE8 IN VARCHAR2)
+  RETURN VARCHAR2
+IS
+  L_SURGEON_KPI VARCHAR2( 100);
+BEGIN
+  IF P_ATTRIBUTE8 IS NULL THEN
+    L_SURGEON_KPI :='';
+    RETURN L_SURGEON_KPI;
+  ELSIF TO_NUMBER(P_ATTRIBUTE8)>0 THEN
+    SELECT NPI
+    INTO L_SURGEON_KPI
+    FROM xx_om_surgeon_data_v
+    WHERE NVL(active_flag,'Y') = 'Y'
+    AND REC_ID                 =P_ATTRIBUTE8;
+    RETURN L_SURGEON_KPI;
+  ELSE
+    L_SURGEON_KPI :='';
+    RETURN L_SURGEON_KPI;
+  END IF;
+EXCEPTION
+WHEN OTHERS THEN
+  SELECT NPI
+  INTO L_SURGEON_KPI
+  FROM xx_om_surgeon_data_v
+  WHERE NVL(active_flag,'Y') = 'Y'
+  AND SURGEON_NAME           =P_ATTRIBUTE8 ;
+  RETURN L_SURGEON_KPI;
+END;
+FUNCTION GET_SURGEON_NAME(
+    P_ATTRIBUTE8 IN VARCHAR2)
+  RETURN VARCHAR2
+IS
+  L_SURGEON_NAME VARCHAR2(100);
+BEGIN
+  IF P_ATTRIBUTE8 IS NULL THEN
+    L_SURGEON_NAME:='';
+    RETURN L_SURGEON_NAME;
+  ELSIF TO_NUMBER(P_ATTRIBUTE8)>0 THEN
+    SELECT SURGEON_NAME
+    INTO L_SURGEON_NAME
+    FROM xx_om_surgeon_data_v
+    WHERE NVL(active_flag,'Y') = 'Y'
+    AND REC_ID                 =P_ATTRIBUTE8;
+    RETURN L_SURGEON_NAME;
+  ELSE
+    L_SURGEON_NAME :='';
+    RETURN L_SURGEON_NAME;
+  END IF;
+EXCEPTION
+WHEN OTHERS THEN
+  SELECT SURGEON_NAME
+  INTO L_SURGEON_NAME
+  FROM xx_om_surgeon_data_v
+  WHERE NVL(active_flag,'Y') = 'Y'
+  AND SURGEON_NAME           =P_ATTRIBUTE8 ;
+  RETURN L_SURGEON_NAME;
+END;
+END SS_GET_SUB_LOC;
+/
