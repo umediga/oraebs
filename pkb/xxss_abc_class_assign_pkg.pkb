@@ -1,5 +1,3 @@
-DROP PACKAGE BODY APPS.XXSS_ABC_CLASS_ASSIGN_PKG;
-
 CREATE OR REPLACE PACKAGE BODY APPS.XXSS_ABC_CLASS_ASSIGN_PKG
 AS
    /**************************************************************************************
@@ -74,7 +72,7 @@ AS
       l_abc_class_c_name   mtl_abc_classes.abc_class_name%TYPE;
       l_abc_class_desc     mtl_abc_classes.description%TYPE;
       l_user_name          NUMBER DEFAULT fnd_global.user_id;
-
+      
       /**
       * Select items that are are stock enabled, transactable, cycle count enabled
       */

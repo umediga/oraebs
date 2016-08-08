@@ -1772,7 +1772,8 @@ CREATE OR REPLACE PACKAGE BODY APPS.XX_OM_CONSIGNMENT_ORDER_PKG as
   -- No user parameter
   -- ====================================================================================================
   procedure xx_om_update_sales_line(p_status_code varchar2, p_org_id number, p_line_id number) is
-    pragma autonomous_transaction;
+  -- uediga, ticket#1234, commented out pragma auto transaction
+    --pragma autonomous_transaction;
     x_conc_req_id number;
     x_org_id number;
     x_user_id number;
